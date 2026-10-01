@@ -1,0 +1,2191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade Winds</title>
+<meta name="description" content="Trade Winds: a board game for AP World History, Unit 4, 1450 to 1750.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B5%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<script>
+/* =====================================================================
+   ONLINE PLAY SETUP
+   Replace null below with the firebaseConfig object from your Firebase
+   project (see SETUP.md). It must include databaseURL. For example:
+
+   const FIREBASE_CONFIG = {
+     apiKey: "AIza...",
+     authDomain: "your-project.firebaseapp.com",
+     databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+     projectId: "your-project",
+     appId: "1:123:web:abc"
+   };
+
+   With null, the game still works in one-screen mode.
+   ===================================================================== */
+const FIREBASE_CONFIG = const firebaseConfig = {
+  apiKey: "AIzaSyDSrMWW8YHWIuw10PQ1ihFEaroEB4HdWZ8",
+  authDomain: "unit-4---trade-winds.firebaseapp.com",
+  databaseURL: "https://unit-4---trade-winds-default-rtdb.firebaseio.com",
+  projectId: "unit-4---trade-winds",
+  storageBucket: "unit-4---trade-winds.firebasestorage.app",
+  messagingSenderId: "331926830672",
+  appId: "1:331926830672:web:7c844df08ba4864211db55"
+};
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--indigo); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { margin: 0; }
+p { margin: 0 0 .6em; }
+button { font: inherit; }
+:focus-visible { outline: 2px solid var(--glass); outline-offset: 2px; }
+.card :focus-visible { outline-color: #2D5C8F; }
+
+/* ---------- Buttons & fields ---------- */
+.btn { font-weight: 700; background: var(--glass); color: var(--glassInk); border: 0; border-radius: 6px; padding: 10px 16px; cursor: pointer; line-height: 1.2; }
+.btn:hover:not(:disabled) { background: #B6E5DD; }
+.btn.ghost { background: transparent; color: var(--text); box-shadow: inset 0 0 0 1px rgba(236, 228, 208, .42); }
+.btn.ghost:hover:not(:disabled) { background: rgba(236, 228, 208, .08); }
+.btn.link { background: none; color: var(--glass); padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
+.btn.ink { background: var(--ink); color: var(--paper); margin-top: 6px; }
+.btn.ink:hover { background: #3A352D; }
+.btn.sm { padding: 6px 10px; font-size: 14px; }
+.btn.link.sm { padding: 2px 0; }
+.btn.wide { width: 100%; }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.asLink { background: none; border: 0; padding: 0; cursor: pointer; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 14px; color: var(--text2); }
+.field.grow { flex: 1; }
+input, select { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid #CDBE97; border-radius: 5px; padding: 9px 10px; min-width: 0; }
+#code { width: 8.5ch; text-transform: uppercase; letter-spacing: .16em; font-weight: 700; }
+.hint { color: var(--text2); font-size: 14.5px; }
+.hint.ink, .card .hint { color: var(--ink2); }
+.note { background: rgba(158, 217, 207, .1); border-left: 3px solid var(--glass); padding: 10px 12px; font-size: 15px; }
+.waiting { color: var(--text2); font-style: italic; }
+.card .waiting { color: var(--ink2); }
+.empty { color: var(--text2); font-size: 14.5px; }
+
+/* ---------- Chips ---------- */
+.chip { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--c); color: #14193A; font-weight: 800; font-size: 12px; flex: none; box-shadow: 0 0 0 1px rgba(14, 21, 51, .5); }
+.chip.blank { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(236, 228, 208, .4); }
+.chip.lg { width: 42px; height: 42px; font-size: 19px; }
+.chip.sm { width: 18px; height: 18px; font-size: 10px; margin-right: 6px; vertical-align: -3px; display: inline-grid; }
+
+/* ---------- Top bar ---------- */
+.bar { display: flex; align-items: center; gap: 18px; padding: 10px 20px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.wordmark { font-family: var(--serif); font-size: 25px; color: var(--text); }
+.round { font-weight: 700; }
+.room { color: var(--text2); }
+.room b { color: var(--text); letter-spacing: .14em; }
+.barBtns { margin-left: auto; display: flex; gap: 8px; }
+
+/* ---------- Map ---------- */
+.map { display: block; width: 100%; height: auto; }
+.sea { fill: var(--sea); }
+.rhumb line { stroke: var(--cotton); stroke-width: .5; }
+.rhumb .rh1 { stroke-opacity: .13; }
+.rhumb .rh2 { stroke-opacity: .06; }
+.rose circle { fill: none; stroke: rgba(228, 217, 191, .35); stroke-width: .7; }
+.rose polygon { fill: rgba(228, 217, 191, .2); stroke: rgba(228, 217, 191, .45); stroke-width: .5; }
+.land path { stroke: #B3A277; stroke-width: .7; stroke-linejoin: round; }
+.lakes path { fill: var(--sea); stroke: #B3A277; stroke-width: .6; }
+.ocean { font-family: var(--serif); font-style: italic; font-size: 13px; fill: rgba(228, 217, 191, .45); letter-spacing: .05em; }
+.ocean.small { font-size: 9.5px; }
+.route { fill: none; stroke-width: 1.1; }
+.route.sea { stroke: rgba(228, 217, 191, .42); stroke-dasharray: 5 3.5; }
+.route.forced { stroke: #E08B7A; stroke-dasharray: 1.6 3; stroke-width: 1.7; stroke-linecap: round; }
+.route.land { stroke: #7C6A44; stroke-dasharray: 1 2.8; stroke-width: 1.4; stroke-linecap: round; }
+.routeLab { font-family: var(--serif); font-style: italic; font-size: 9.5px; fill: rgba(228, 217, 191, .75); }
+.routeLab.forced { fill: #F2AE9F; }
+.routeLab.land { fill: #6B5A37; }
+.city { fill: #5B4E33; }
+.cityLab { font-size: 8.5px; fill: #4B412B; font-weight: 700; }
+.mLab { font-size: 10px; font-weight: 800; fill: #F3ECDD; paint-order: stroke; stroke: #19234C; stroke-width: 2.8px; stroke-linejoin: round; pointer-events: none; }
+.frame { fill: none; stroke: rgba(228, 217, 191, .3); }
+.mk { cursor: pointer; outline: none; }
+.mk .hit { fill: transparent; }
+.mk .dot { fill: #16214A; stroke: var(--cotton); stroke-width: 1.3; }
+.mk.owned .dot { stroke: #0E1533; stroke-width: 1.4; }
+.mk:hover .dot { stroke: #fff; }
+.mk:focus-visible .dot { stroke: var(--glass); stroke-width: 2.6; }
+.gly { color: var(--cotton); fill: var(--cotton); }
+.mk .ini { font-size: 10.5px; font-weight: 800; fill: #14193A; pointer-events: none; }
+.mk .cap { fill: none; stroke-width: 1.7; }
+.mk .tRing { fill: none; stroke: var(--glass); stroke-width: 1.9; stroke-dasharray: 3 2.2; }
+.mk .sRing { fill: none; stroke: #fff; stroke-width: 2; }
+.lgDot { fill: #16214A; stroke: var(--cotton); stroke-width: 1; }
+.mapFrame { border-radius: 6px; overflow: hidden; box-shadow: 0 0 0 1px rgba(228, 217, 191, .25), 0 10px 30px rgba(8, 12, 30, .35); background: var(--sea); }
+.mapScroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--text2); margin: 10px 2px 16px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+/* ---------- Home ---------- */
+.home { position: relative; min-height: 100vh; display: grid; place-items: center; padding: 28px 16px; overflow: hidden; background: var(--sea); }
+.homeMap { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.homeMap .map { width: max(100vw, 1100px); flex: none; -webkit-mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(to bottom, transparent, #000 14%, #000 86%, transparent); }
+.homeMap .frame { display: none; }
+.homeCard { position: relative; width: 100%; max-width: 600px; background: rgba(22, 31, 72, .9); padding: 34px 36px 28px; border-radius: 8px; box-shadow: 0 0 0 1px rgba(228, 217, 191, .22), 0 30px 80px rgba(6, 10, 28, .6); }
+.title { font-family: var(--serif); font-weight: 400; font-size: clamp(54px, 10vw, 88px); line-height: .92; letter-spacing: -.01em; }
+.sub { font-family: var(--serif); font-style: italic; font-size: 18px; color: var(--text2); margin: 10px 0 14px; line-height: 1.35; }
+.lede { font-size: 16.5px; max-width: 52ch; }
+.homeGroup { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+.homeGroup h2 { font-family: var(--serif); font-weight: 400; font-size: 23px; margin-bottom: 10px; }
+.homeGroup .field { margin-bottom: 6px; }
+.homeActions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; margin-top: 10px; }
+.joinRow { display: inline-flex; gap: 8px; }
+.or { color: var(--text2); font-style: italic; }
+
+/* ---------- Pages ---------- */
+.page { max-width: 1120px; margin: 0 auto; padding: 24px 20px 48px; }
+.page.narrow { max-width: 720px; }
+.page h2 { font-family: var(--serif); font-weight: 400; font-size: 24px; margin: 24px 0 12px; }
+.pageTitle { font-family: var(--serif); font-weight: 400; font-size: clamp(32px, 5vw, 46px); line-height: 1.05; margin-bottom: 8px; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 24px; }
+.seg { border: 0; padding: 0; margin: 20px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.seg legend { font-size: 14px; color: var(--text2); margin-bottom: 6px; padding: 0; }
+.seg.inline { margin: 0 0 14px; }
+.segBtn { background: transparent; color: var(--text); border: 1px solid rgba(236, 228, 208, .35); border-radius: 6px; padding: 8px 14px; cursor: pointer; font-weight: 700; display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+.segBtn small { font-weight: 400; color: var(--text2); font-size: 13px; }
+.segBtn.on { background: var(--glass); color: var(--glassInk); border-color: var(--glass); }
+.segBtn.on small { color: var(--glassInk); }
+.setupRows { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
+.setupRow { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.setupRow .chip { margin-bottom: 8px; }
+.powersRef { margin-top: 22px; }
+.powersRef summary { cursor: pointer; color: var(--glass); font-weight: 700; }
+.powerRef { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px 20px; margin-top: 12px; }
+.powerRef b { display: inline-flex; align-items: center; }
+.powerRef p { font-size: 14.5px; color: var(--text2); margin: 4px 0 0; }
+
+/* ---------- Lobby ---------- */
+.lobbyTop { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: start; }
+.lobbyTop h2 { margin-top: 0; }
+.roomBig { background: var(--paper); color: var(--ink); padding: 16px 20px; border-radius: 6px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.roomBig span { font-size: 14px; color: var(--ink2); }
+.roomBig b { font-size: 50px; letter-spacing: .16em; line-height: 1; font-weight: 800; }
+.roomBig .btn.ghost { color: var(--ink); box-shadow: inset 0 0 0 1px rgba(34, 31, 26, .35); margin-top: 6px; }
+.plist { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+.plist li { display: flex; align-items: center; gap: 10px; }
+.pname em { font-style: normal; font-size: 12.5px; background: rgba(236, 228, 208, .14); padding: 1px 6px; border-radius: 3px; margin-left: 4px; }
+.pstat { color: var(--text2); margin-left: auto; font-size: 14.5px; }
+.away { font-size: 12.5px; color: #F2AE9F; }
+.powerGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.powerTile { text-align: left; background: var(--indigo2); border: 1px solid var(--line); border-top: 4px solid var(--c); color: var(--text); padding: 14px; border-radius: 4px; display: flex; flex-direction: column; gap: 6px; cursor: pointer; }
+.powerTile:hover:not(:disabled) { background: var(--indigo3); }
+.powerTile.on { background: var(--indigo3); box-shadow: inset 0 0 0 2px var(--glass); }
+.powerTile:disabled { opacity: .5; cursor: not-allowed; }
+.ptHead { display: flex; align-items: center; gap: 8px; font-size: 17px; }
+.taken { margin-left: auto; font-size: 13px; color: var(--text2); }
+.ptAbility { font-family: var(--serif); font-style: italic; font-size: 16px; }
+.ptText, .ptStart { font-size: 14px; color: var(--text2); }
+.waiting.hint { margin-top: 20px; }
+
+/* ---------- Game board ---------- */
+.board { display: grid; grid-template-columns: minmax(0, 1fr) 390px; gap: 22px; padding: 16px 20px 40px; max-width: 1560px; margin: 0 auto; align-items: start; }
+.rail { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; display: flex; flex-direction: column; gap: 14px; padding-bottom: 4px; }
+.ledgers { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.ledger { background: var(--indigo2); border-left: 4px solid var(--c); padding: 10px 12px; border-radius: 2px 6px 6px 2px; }
+.ledger.now { background: var(--indigo3); box-shadow: inset 0 0 0 1px rgba(158, 217, 207, .55); }
+.lgTop { display: flex; align-items: center; gap: 10px; }
+.lgName { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.lgName b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lgName span { font-size: 13px; color: var(--text2); }
+.prest { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; line-height: 1; }
+.prest b { font-family: var(--serif); font-size: 28px; font-weight: 400; }
+.prest span { font-size: 11.5px; color: var(--text2); }
+.lgStats { display: flex; gap: 12px; font-size: 14px; color: var(--text2); margin-top: 8px; flex-wrap: wrap; }
+.lgStats b { color: var(--text); }
+.lgTech { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.lgTech span { font-size: 12px; background: rgba(236, 228, 208, .1); padding: 1px 7px; border-radius: 3px; }
+.lgTech .none { background: none; padding: 0; color: var(--text2); }
+.lgAway { font-size: 13px; color: #F2AE9F; margin-top: 6px; }
+.log { margin-top: 14px; font-size: 14px; }
+.log summary { cursor: pointer; color: var(--text2); }
+.log ul { list-style: none; padding: 0; margin: 8px 0 0; display: flex; flex-direction: column; gap: 4px; }
+.lr { display: inline-block; min-width: 2.4em; color: var(--text2); font-size: 12px; }
+
+.turn { background: var(--indigo2); border-radius: 8px; padding: 16px; box-shadow: inset 0 0 0 1px var(--line); }
+.tHead { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+.tHead h2 { font-family: var(--serif); font-weight: 400; font-size: 26px; line-height: 1.05; }
+.tHead p { margin: 0; color: var(--text2); font-size: 14.5px; }
+.revenue { font-size: 14.5px; }
+.lastMove { font-size: 14px; color: var(--text2); display: flex; align-items: center; }
+.step { font-family: var(--serif); font-weight: 400; font-size: 21px; margin: 12px 0 10px; }
+.qPick { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+.qBtn { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "n p" "d p"; text-align: left; gap: 2px 12px; background: var(--paper); color: var(--ink); border: 0; border-radius: 5px; padding: 11px 14px; cursor: pointer; }
+.qBtn:hover { background: #FFF8EA; }
+.qName { grid-area: n; font-weight: 800; font-size: 17px; }
+.qDesc { grid-area: d; font-size: 14px; color: var(--ink2); }
+.qPay { grid-area: p; align-self: center; font-family: var(--serif); font-size: 20px; }
+
+/* Paper cards */
+.card { background: var(--paper); color: var(--ink); border-radius: 4px; padding: 16px 18px; box-shadow: 0 1px 0 rgba(0, 0, 0, .25), 0 10px 26px rgba(8, 12, 30, .35); }
+.qMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; font-size: 13px; color: var(--ink2); margin-bottom: 10px; }
+.qMeta span:first-child { font-weight: 700; color: var(--ink); }
+.stim { margin: 0 0 12px; padding: 10px 12px; border-left: 3px solid #B9A57A; background: var(--paper2); }
+.stim figcaption { font-size: 12.5px; color: var(--ink2); font-style: italic; margin-bottom: 4px; }
+.stim p { font-family: var(--serif); font-size: 17px; line-height: 1.5; margin: 0; }
+.qText { font-weight: 700; font-size: 17px; line-height: 1.4; }
+.opts { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 7px; }
+.opt { display: flex; gap: 10px; align-items: flex-start; width: 100%; text-align: left; background: #FBF6EA; color: var(--ink); border: 1px solid #D8CCB2; border-radius: 4px; padding: 9px 11px; cursor: pointer; flex-wrap: wrap; }
+.opt:hover:not(:disabled) { border-color: #8F7E57; background: #fff; }
+.opt:disabled { cursor: default; }
+.let { flex: none; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; font-size: 13px; background: var(--paper2); }
+.otx { flex: 1; min-width: 0; padding-top: 1px; }
+.opt.right { border-color: var(--leaf); background: #E2EDDC; }
+.opt.right .let { background: var(--leaf); color: #fff; }
+.opt.wrong { border-color: var(--madder); background: #F5E0D8; }
+.opt.wrong .let { background: var(--madder); color: #fff; }
+.opt.guessed { border-color: #2D5C8F; box-shadow: inset 0 0 0 1px #2D5C8F; }
+.mark { flex-basis: 100%; padding-left: 34px; font-size: 12.5px; font-weight: 700; color: var(--ink2); }
+.result { margin-top: 12px; border-top: 1px solid #D8CCB2; padding-top: 10px; }
+.verdict { font-weight: 800; font-size: 16.5px; }
+.result.ok .verdict { color: var(--leaf); }
+.result.no .verdict { color: var(--madder); }
+.why { font-size: 15.5px; }
+.ansLine { font-size: 15.5px; }
+.guessNote { font-size: 14px; color: var(--ink2); }
+
+.moveGroup { margin-top: 14px; }
+.moveGroup h4 { font-size: 14.5px; color: var(--text2); font-weight: 700; margin-bottom: 6px; }
+.mList { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.mRow, .tRow { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: var(--indigo3); color: var(--text); border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px; cursor: pointer; }
+.mRow:hover, .tRow:hover:not(:disabled) { border-color: var(--glass); }
+.tRow:disabled { opacity: .5; cursor: not-allowed; }
+.mName { display: flex; flex-direction: column; flex: 1; min-width: 0; line-height: 1.3; }
+.mName span { font-size: 13.5px; color: var(--text2); }
+.mName .origin { font-style: italic; font-size: 12.5px; }
+.mCost { display: flex; flex-direction: column; align-items: flex-end; font-size: 12px; color: var(--text2); line-height: 1.1; flex: none; }
+.mCost b { font-family: var(--serif); font-weight: 400; font-size: 22px; color: var(--text); }
+.mGly { flex: none; display: grid; }
+.mList.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.mList.grid .mRow { padding: 7px 8px; gap: 7px; height: 100%; }
+.mList.grid .mName b { font-size: 14.5px; }
+.mList.grid .mName span { font-size: 12.5px; }
+.mList .rg { grid-column: 1 / -1; font-size: 12.5px; color: var(--text2); margin-top: 4px; }
+.mList .rg:first-child { margin-top: 0; }
+.moveGroup + .moveGroup { margin-top: 16px; }
+.qCard.revealed .result { margin: 0 0 14px; border-top: 0; border-bottom: 1px solid #D8CCB2; padding: 0 0 12px; }
+.qCard.revealed .btn.ink { margin: 0 0 14px; }
+.mapHint { display: none; font-size: 13px; color: var(--text2); margin: 6px 2px 0; }
+
+.evCard h2 { font-family: var(--serif); font-weight: 400; font-size: 30px; line-height: 1.05; }
+.evRound { font-size: 13px; color: var(--ink2); margin-bottom: 6px; }
+.evDate { font-family: var(--serif); font-style: italic; color: var(--ink2); font-size: 17px; }
+.evBlurb { font-size: 16px; }
+.evEffect { background: var(--paper2); padding: 8px 10px; border-radius: 3px; font-size: 15px; }
+.evResults { padding-left: 1.1em; margin: 8px 0 12px; font-size: 15px; }
+
+.mPanel { background: var(--indigo2); border-radius: 8px; padding: 14px 16px; box-shadow: inset 0 0 0 1px var(--line); }
+.mpHead { display: flex; align-items: baseline; gap: 10px; }
+.mpHead h3 { font-family: var(--serif); font-weight: 400; font-size: 24px; }
+.mpHead .btn { margin-left: auto; }
+.mpSub { font-size: 14px; color: var(--text2); margin-top: 2px; }
+.mpOwner { font-size: 15px; display: flex; align-items: center; }
+.mpNote { font-size: 15px; }
+
+/* ---------- Game over ---------- */
+.tableWrap { overflow-x: auto; margin-top: 16px; }
+table.final { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 15px; }
+.final th { text-align: right; font-weight: 700; color: var(--text2); font-size: 13.5px; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.final th:nth-child(-n+2) { text-align: left; }
+.final td { padding: 10px; text-align: right; border-bottom: 1px solid var(--line); }
+.final td:first-child { text-align: left; color: var(--text2); width: 2em; }
+.final td:nth-child(2) { text-align: left; }
+.final .who { display: flex; gap: 10px; align-items: center; }
+.final .who > span { display: flex; flex-direction: column; line-height: 1.2; }
+.final .who > span span { font-size: 13px; color: var(--text2); }
+.overSub { font-family: var(--serif); font-style: italic; font-size: 20px; color: var(--text2); margin-bottom: 4px; }
+.final .tot { font-family: var(--serif); font-size: 26px; }
+.final tr.win td { background: rgba(158, 217, 207, .08); }
+.mapFrame.small { margin-top: 24px; }
+.review { margin-top: 12px; }
+.acc { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 8px; }
+.acc b { font-family: var(--serif); font-weight: 400; font-size: 24px; }
+.rvList { list-style: none; padding: 0; margin: 14px 0 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; }
+.rvStim { font-family: var(--serif); font-size: 15.5px; background: var(--paper2); padding: 8px 10px; border-left: 3px solid #B9A57A; }
+.rvA { color: var(--leaf); }
+.rvYou { color: var(--madder); }
+
+/* ---------- Modal & toast ---------- */
+#modal .scrim { position: fixed; inset: 0; background: rgba(10, 14, 35, .62); z-index: 20; }
+#modal .sheet { position: fixed; z-index: 21; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(680px, calc(100vw - 24px)); max-height: 86vh; overflow: auto; background: var(--indigo2); border-radius: 8px; padding: 20px 24px 24px; box-shadow: 0 0 0 1px rgba(228, 217, 191, .25), 0 30px 80px rgba(0, 0, 0, .5); }
+.sheetHead { display: flex; align-items: baseline; gap: 12px; margin-bottom: 10px; }
+.sheetHead h2 { font-family: var(--serif); font-weight: 400; font-size: 28px; }
+.sheetHead .btn { margin-left: auto; }
+.rules h3 { font-family: var(--serif); font-weight: 400; font-size: 20px; margin: 18px 0 6px; }
+.rules ol, .rules ul { padding-left: 1.2em; margin: 0 0 10px; }
+.rules li { margin-bottom: 5px; }
+.menuList { display: flex; flex-direction: column; gap: 10px; }
+#toast { position: fixed; left: 50%; bottom: 20px; transform: translate(-50%, 20px); background: var(--paper); color: var(--ink); padding: 10px 16px; border-radius: 6px; font-weight: 700; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); z-index: 30; }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1020px) {
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: static; max-height: none; order: -1; }
+}
+@media (max-width: 720px) {
+  .mapScroll .map { min-width: 700px; }
+  .mapHint { display: block; }
+  .bar { padding: 8px 14px; gap: 10px; }
+  .wordmark { font-size: 21px; }
+  .homeCard { padding: 26px 20px 22px; }
+  .lobbyTop { grid-template-columns: 1fr; gap: 18px; }
+  .board { padding: 12px 12px 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #toast { transition: none; }
+}
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<noscript><p style="padding:20px">Trade Winds needs JavaScript turned on.</p></noscript>
+<script>
+/* ============================================================
+   GAME DATA
+   ============================================================ */
+const REGIONS = {
+  africa:   { name: "Atlantic Africa" },
+  americas: { name: "The Americas" },
+  indian:   { name: "Indian Ocean" },
+  asia:     { name: "East & Southeast Asia" }
+};
+
+const GOODS = {
+  gold:     { name: "Gold" },
+  silver:   { name: "Silver" },
+  cash:     { name: "Cash crops" },
+  spices:   { name: "Spices" },
+  textiles: { name: "Textiles & porcelain" },
+  raw:      { name: "Raw goods" }
+};
+
+const POWERS = {
+  portugal: {
+    name: "Portugal", short: "P", color: "#D9434F", euro: true, home: "elmina",
+    startTech: ["caravel"], silver: 6,
+    ability: "Trading-post empire",
+    abilityText: "Claiming costs 1 less silver everywhere outside the Americas.",
+    blurb: "The first mover. Fortified trading posts from West Africa to the Spice Islands."
+  },
+  spain: {
+    name: "Spain", short: "S", color: "#C65BB0", euro: true, home: "caribbean",
+    startTech: ["carrack"], silver: 7,
+    ability: "Silver fleets",
+    abilityText: "Claiming costs 1 less silver in the Americas. Earn 1 extra silver per Silver market you hold.",
+    blurb: "Columbus’s sponsor. Colonies, tribute, and coerced labor across the Americas."
+  },
+  dutch: {
+    name: "Dutch Republic", short: "D", color: "#F28A30", euro: true, home: "spice",
+    startTech: ["fluyt"], silver: 5,
+    ability: "VOC muscle",
+    abilityText: "Seizing a rival’s market costs you 2 less silver.",
+    blurb: "A joint-stock latecomer that pushed Portugal out of the spice trade."
+  },
+  mughal: {
+    name: "Mughal Empire", short: "M", color: "#3FA35B", euro: false, home: "surat",
+    startTech: ["lateen"], silver: 5,
+    ability: "Gujarati merchants",
+    abilityText: "Gain 1 silver whenever a rival claims or seizes an Indian Ocean market.",
+    blurb: "A land-based giant whose merchants profited as Europeans crowded in."
+  },
+  china: {
+    name: "Ming–Qing China", short: "C", color: "#EEE8DA", euro: false, home: "canton",
+    startTech: ["compass"], silver: 5,
+    ability: "Silver magnet",
+    abilityText: "Earn 1 extra silver each turn for every 2 Silver markets anyone holds.",
+    blurb: "The world’s largest economy. Its demand for silver pulled American bullion across two oceans."
+  },
+  asante: {
+    name: "Asante Empire", short: "A", color: "#E8B931", euro: false, home: "kumasi",
+    startTech: [], silver: 7,
+    ability: "Gold and guns",
+    abilityText: "Earn 1 extra silver per Gold market you hold. European powers pay 2 more to seize your markets.",
+    blurb: "A West African state that grew rich and strong trading with Europeans."
+  }
+};
+const POWER_ORDER = ["portugal", "spain", "dutch", "mughal", "china", "asante"];
+
+/* lat/lon are display positions (a few are nudged so markers don't overlap). */
+const MARKETS = {
+  elmina:    { name: "Elmina", region: "africa", good: "gold", product: "Gold", cost: 4, lat: 3.6, lon: -0.6, lab: "b",
+               note: "Portugal built a fortified trading post here on the Gold Coast in 1482." },
+  kumasi:    { name: "Kumasi", region: "africa", good: "gold", product: "Gold", cost: 4, lat: 9.8, lon: -3.0, lab: "l",
+               note: "Capital of the Asante, who rose in the 1700s by trading gold, and enslaved captives, to Europeans for firearms." },
+  kongo:     { name: "Mbanza Kongo", region: "africa", good: "raw", product: "Copper", cost: 3, lat: -4.0, lon: 16.5, lab: "r",
+               note: "Capital of the Kingdom of Kongo, whose kings adopted Christianity and traded with Portugal." },
+  luanda:    { name: "Luanda", region: "africa", good: "raw", product: "Ivory", cost: 3, lat: -10.2, lon: 13.0, lab: "l",
+               note: "Portuguese base in Angola from 1576, contested by Queen Nzinga of Ndongo and Matamba." },
+  quebec:    { name: "Quebec", region: "americas", good: "raw", product: "Furs", cost: 3, lat: 46.8, lon: -71.2, lab: "r",
+               note: "Founded by Samuel de Champlain in 1608 to anchor the French fur trade." },
+  carolina:  { name: "Carolina", region: "americas", good: "cash", product: "Rice & indigo", cost: 3, lat: 32.8, lon: -79.9, lab: "r",
+               note: "Rice and indigo plantations here depended on enslaved labor. Site of the Stono Rebellion (1739)." },
+  caribbean: { name: "Hispaniola", region: "americas", good: "cash", product: "Sugar", cost: 3, lat: 19.0, lon: -71.0, lab: "r",
+               note: "Columbus founded Spain’s first American settlement here in 1492. The Caribbean became the center of sugar production." },
+  newspain:  { name: "New Spain", region: "americas", good: "silver", product: "Silver", cost: 5, lat: 19.4, lon: -99.1, lab: "r",
+               note: "Mexico City rose on the ruins of the Aztec capital. Mines to the north produced huge amounts of silver." },
+  potosi:    { name: "Potosí", region: "americas", good: "silver", product: "Silver", cost: 6, lat: -19.6, lon: -65.8, lab: "r",
+               note: "The Andean “silver mountain,” mined by Indigenous men forced to work through the mit’a draft." },
+  brazil:    { name: "Bahia", region: "americas", good: "cash", product: "Sugar", cost: 3, lat: -13.0, lon: -38.5, lab: "r",
+               note: "The sugar capital of Portuguese Brazil, built on the labor of enslaved Africans." },
+  kilwa:     { name: "Kilwa", region: "indian", good: "gold", product: "Gold & ivory", cost: 4, lat: -8.9, lon: 39.5, lab: "r",
+               note: "A Swahili city-state that traded gold from the African interior. Sacked by the Portuguese in 1505." },
+  hormuz:    { name: "Hormuz", region: "indian", good: "raw", product: "Pearls & horses", cost: 3, lat: 27.1, lon: 56.4, lab: "t",
+               note: "Gateway to the Persian Gulf. Portugal held it from 1515 until 1622." },
+  surat:     { name: "Surat", region: "indian", good: "textiles", product: "Cotton textiles", cost: 4, lat: 21.2, lon: 72.8, lab: "l",
+               note: "The Mughal Empire’s great port, home to wealthy Gujarati merchants." },
+  calicut:   { name: "Calicut", region: "indian", good: "spices", product: "Pepper", cost: 4, lat: 11.25, lon: 75.8, lab: "b",
+               note: "Vasco da Gama arrived here in 1498 after sailing around Africa." },
+  malacca:   { name: "Malacca", region: "asia", good: "spices", product: "Spice trade", cost: 4, lat: 2.2, lon: 102.25, lab: "b",
+               note: "A hub on the strait between the Indian Ocean and the South China Sea. Seized by Portugal in 1511 and by the Dutch in 1641." },
+  spice:     { name: "Spice Islands", region: "asia", good: "spices", product: "Cloves & nutmeg", cost: 5, lat: -3.5, lon: 128.2, lab: "b",
+               note: "The Moluccas, the world’s only source of cloves and nutmeg. The Dutch VOC fought to monopolize them." },
+  manila:    { name: "Manila", region: "asia", good: "silver", product: "Silver exchange", cost: 5, lat: 14.6, lon: 121.0, lab: "r",
+               note: "Spanish base from 1571. Galleons from Acapulco brought American silver here to buy Chinese goods." },
+  canton:    { name: "Canton", region: "asia", good: "textiles", product: "Silk & porcelain", cost: 5, lat: 23.1, lon: 113.3, lab: "l",
+               note: "Guangzhou, the southern Chinese port where foreign traders bought silk and porcelain." },
+  nagasaki:  { name: "Nagasaki", region: "asia", good: "silver", product: "Silver", cost: 4, lat: 32.75, lon: 129.87, lab: "t",
+               note: "Japan’s window on Europe. After the 1630s only Dutch traders could stay, confined to the island of Dejima." }
+};
+const MARKET_ORDER = Object.keys(MARKETS);
+
+const TECHS = {
+  compass:    { name: "Magnetic compass", origin: "Developed in China", cost: 4,
+                text: "Claiming costs 1 less silver outside your home region." },
+  astrolabe:  { name: "Astrolabe", origin: "Greek design, refined by scholars in the Islamic world", cost: 4,
+                text: "Earn 1 extra silver for every correct answer." },
+  lateen:     { name: "Lateen sail", origin: "Long used by Arab sailors in the Indian Ocean", cost: 4,
+                text: "Earn 1 extra silver at the start of each turn." },
+  caravel:    { name: "Caravel", origin: "Portuguese design", cost: 4,
+                text: "Claiming costs 1 less silver in Atlantic Africa and the Americas." },
+  carrack:    { name: "Carrack", origin: "Iberian design with room for heavy guns", cost: 4,
+                text: "Rivals pay 2 more silver to seize your markets." },
+  fluyt:      { name: "Fluyt", origin: "Dutch design", cost: 4,
+                text: "Earn 1 extra silver each turn for every 2 markets you hold." },
+  jointstock: { name: "Joint-stock company", origin: "Dutch and English innovation", cost: 5,
+                text: "Limited liability: when an event costs you silver, you lose only half." }
+};
+const TECH_ORDER = Object.keys(TECHS);
+const NAV_SET = ["compass", "astrolabe", "lateen"];
+
+const QTYPES = {
+  recall:    { name: "Recall", reward: 2, desc: "Terms, people, and events" },
+  stimulus:  { name: "Source", reward: 3, desc: "Read a source, answer AP-style" },
+  reasoning: { name: "Reasoning", reward: 4, desc: "Causation, comparison, change over time" }
+};
+
+const TOPICS = {
+  1: "4.1 Technological innovations",
+  2: "4.2 Exploration: causes and events",
+  3: "4.3 Columbian Exchange",
+  4: "4.4 Maritime empires established",
+  5: "4.5 Maritime empires maintained",
+  6: "4.6 Challenges to state power",
+  7: "4.7 Changing social hierarchies"
+};
+
+const EVENTS = {
+  silverboom: { title: "Potosí silver boom", date: "1545 onward",
+    blurb: "Spanish colonists found a mountain of silver at Potosí in 1545. American silver soon flooded markets around the world.",
+    effect: "Every Silver market pays its holder 2 silver." },
+  greatdying: { title: "The Great Dying", date: "1500s",
+    blurb: "Smallpox, measles, and malaria from the Eastern Hemisphere killed up to 90 percent of the population in some parts of the Americas. Colonizers turned more and more to enslaved African labor.",
+    effect: "Each player loses 1 silver for every market they hold in the Americas." },
+  pueblo: { title: "The Pueblo Revolt", date: "1680",
+    blurb: "Pueblo communities led by Popé rose against Spanish missionaries and forced labor, driving the Spanish out of New Mexico until 1692.",
+    effect: "If a European power holds New Spain, it loses control there." },
+  maroons: { title: "Maroon communities", date: "1600s–1730s",
+    blurb: "People who escaped slavery built free communities in the mountains of Jamaica and the interior of Brazil. In Jamaica, the British finally signed treaties recognizing Maroon freedom.",
+    effect: "The holders of Hispaniola and Bahia each lose 2 silver." },
+  stono: { title: "The Stono Rebellion", date: "1739",
+    blurb: "Enslaved people near the Stono River in South Carolina seized weapons and marched toward Spanish Florida before the colonial militia crushed the revolt. Lawmakers responded with harsher slave codes.",
+    effect: "The holder of Carolina loses 3 silver." },
+  nzinga: { title: "Queen Nzinga fights back", date: "1620s–1650s",
+    blurb: "Queen Nzinga of Ndongo and Matamba allied with the Dutch and resisted Portuguese expansion in Angola for decades.",
+    effect: "If Portugal or Spain holds Luanda, it loses control there. The Dutch Republic gains 2 silver." },
+  tokugawa: { title: "Tokugawa Japan closes its ports", date: "1630s",
+    blurb: "Worried that Christian converts threatened his newly unified realm, the shogun expelled missionaries and the Portuguese. Only Dutch traders stayed, confined to the island of Dejima.",
+    effect: "If Portugal or Spain holds Nagasaki, it loses control there." },
+  mingexpels: { title: "Ming officials expel the Portuguese", date: "1520s",
+    blurb: "Portuguese traders who had used bribery and force to trade in China were expelled by Ming officials, who kept tight control over foreign trade.",
+    effect: "If a European power holds Canton, it loses control there." },
+  voc: { title: "The VOC is chartered", date: "1602",
+    blurb: "The Dutch government granted the United East India Company a monopoly on Dutch trade in Asia. Its investors risked only what they put in.",
+    effect: "Every player with a Joint-stock company gains 3 silver." },
+  anglodutch: { title: "Anglo-Dutch War", date: "1652–1654",
+    blurb: "Rival trading powers fought at sea over commerce. Wars of empire were expensive for everyone involved.",
+    effect: "The player or players holding the most markets each lose 2 silver." },
+  fronde: { title: "The Fronde", date: "1648–1653",
+    blurb: "In France, nobles and townspeople revolted against new taxes and growing royal power. The revolt failed, and the monarchy came out stronger.",
+    effect: "Every player with 10 or more silver pays 3 in new taxes." },
+  newcrops: { title: "New crops feed Afro-Eurasia", date: "1600s–1700s",
+    blurb: "Maize, potatoes, and manioc from the Americas spread to Europe, Africa, and Asia, helping populations grow after 1700.",
+    effect: "Every player gains 2 silver." },
+  gujarati: { title: "Indian Ocean merchants prosper", date: "1600s",
+    blurb: "Gujarati, Arab, and Southeast Asian merchants kept trading across the Indian Ocean as European fleets moved in. Many grew richer.",
+    effect: "Every Indian Ocean market pays its holder 1 silver." },
+  asanterise: { title: "The Asante rise", date: "1701",
+    blurb: "Under Osei Tutu, the Asante united Akan states and grew rich trading gold, and enslaved captives, to Europeans for firearms.",
+    effect: "Every Gold market pays its holder 2 silver." },
+  kongo: { title: "Kongo and Portugal", date: "1500s",
+    blurb: "Kongo’s king Afonso I adopted Christianity and traded with Portugal. The partnership enriched Kongo, though Portuguese slave raiding later strained it.",
+    effect: "The holder of Mbanza Kongo gains 3 silver." },
+  galleons: { title: "The Manila galleons", date: "1571 onward",
+    blurb: "Spanish galleons carried American silver from Acapulco to Manila, where Chinese merchants traded silk and porcelain for it.",
+    effect: "The holder of Manila gains 3 silver. The holder of Canton gains 2." },
+  balance: { title: "A favorable balance of trade", date: "1600s",
+    blurb: "Mercantilist rulers measured wealth in gold and silver and wanted colonies that supplied many kinds of goods.",
+    effect: "The player or players holding the most different goods gain 3 silver." }
+};
+const EVENT_ORDER = Object.keys(EVENTS);
+
+/* ---------------- Map geometry: [lat, lon] ---------------- */
+const LAND = [
+  // The Americas
+  [[62,-125],[49,-125],[48,-124.5],[42,-124.3],[38,-123],[34.5,-120.5],[32.5,-117],[28,-114.5],[22.9,-109.9],[24.6,-110.6],[27.3,-112.2],[31.5,-114.7],[29,-112.5],[27,-110.5],[25,-108.5],[23,-106.4],[21,-105.3],[19.5,-105.2],[18,-102.5],[16.8,-99.9],[15.7,-96.5],[14.5,-92.5],[13.2,-89],[12.2,-87],[11,-85.8],[9.6,-84.6],[8.3,-82.9],[7.5,-80.5],[8.9,-79.5],[7.3,-78],[5,-77.4],[2.5,-78.5],[1,-79.5],[-1,-80.5],[-2.5,-80],[-4.5,-81.3],[-6,-81],[-9,-78.6],[-14,-76.3],[-17,-72.3],[-18.5,-70.4],[-23.5,-70.5],[-30,-71.5],[-36,-73],[-42,-73.8],[-46,-74],[-46,-67.5],[-42,-64],[-40.5,-62.5],[-38.5,-57.5],[-36.5,-56.7],[-34.5,-54],[-32,-52.2],[-28.5,-48.7],[-25.5,-48.4],[-23,-43.2],[-22.9,-41.9],[-21,-40.8],[-18,-39.4],[-13,-38.5],[-10.5,-36.4],[-8,-34.9],[-5.2,-35.4],[-3,-39.5],[-2.5,-44.3],[-1,-48.5],[0,-50],[1.7,-50],[4,-51.5],[5.8,-54],[6.5,-58],[8.5,-60],[10,-61.8],[10.7,-63],[10.5,-66.5],[11.5,-69.8],[12.2,-72],[11.1,-74.2],[9.5,-75.7],[8.7,-77],[9.5,-79],[9.3,-81],[11,-83.7],[15,-83.2],[15.9,-85.5],[15.9,-88.5],[17.5,-88.3],[21.5,-87],[21.2,-90],[19.5,-90.7],[18.5,-92.5],[18.2,-94.5],[19.8,-96.5],[21.5,-97.4],[25,-97.4],[27.8,-97.3],[29.5,-94.5],[29.7,-93],[29.2,-90.5],[29.3,-89],[30.4,-88],[30.2,-86],[29.6,-85],[29.9,-84],[28.5,-82.7],[26.5,-82],[25.1,-81],[25.5,-80.3],[27.5,-80.3],[30.5,-81.4],[32.1,-80.9],[32.8,-79.9],[33.8,-78],[35.2,-75.5],[36.9,-76],[38.5,-75],[39.5,-74.2],[40.6,-74],[41,-72],[41.6,-70.5],[42.6,-70.8],[43.7,-69.8],[44.8,-67],[45.2,-66],[43.5,-65.7],[44.6,-63.4],[45.9,-61.2],[46.3,-64],[47.6,-65],[49.2,-67.5],[50.2,-66.5],[50.3,-62],[51.4,-57],[52.5,-55.8],[54.5,-57.5],[56,-61],[58.5,-62.8],[60.3,-64.5],[62,-72],[58.5,-77],[55.3,-77.3],[52,-79],[51.3,-80.5],[55,-82.3],[56.8,-88],[57.5,-92.5],[59,-94.6],[62,-93]],
+  // Newfoundland
+  [[51.6,-55.5],[49.5,-53.5],[46.7,-53],[47.6,-59.2],[49.5,-58],[51.5,-56.5]],
+  // Cuba, Hispaniola, Jamaica, Puerto Rico
+  [[23,-84.9],[23.2,-82],[22.7,-79.5],[21,-76],[20,-74.2],[19.9,-77.5],[21.6,-79],[22,-81.5],[21.9,-84.5]],
+  [[19.9,-72.8],[19.7,-70],[18.6,-68.4],[18.2,-71],[18,-74.4],[18.6,-74.2]],
+  [[18.5,-78.3],[18.4,-76.4],[17.9,-76.7],[18.1,-78.2]],
+  [[18.5,-67.2],[18.5,-65.6],[18,-65.7],[18,-67.2]],
+  // Scandinavia
+  [[62,5],[60,5],[58.5,6],[58,8],[59,10.5],[57.7,11.8],[55.4,13],[56.1,15.6],[57.5,16.6],[59,18],[60.5,17.5],[62,17.5]],
+  // Eurasia
+  [[62,30],[60,29],[59.5,24.5],[59,23.5],[58.4,23.9],[57,24.3],[57.6,21.7],[56,21],[54.6,19.8],[54.4,18.6],[54.8,16.5],[54,14],[54.2,12],[54.4,10.9],[54.5,10],[55.5,9.7],[56.6,10.3],[57.7,10.6],[57,8.6],[55.5,8.1],[54,8.7],[53.6,7],[53.4,5],[52.4,4.6],[51.4,3.5],[51,2],[50.1,1.5],[49.7,0.2],[49.3,-0.3],[49.7,-1.5],[48.7,-1.6],[48.6,-4.7],[47.8,-4.3],[47.2,-2.2],[46,-1.1],[44,-1.3],[43.4,-1.7],[43.5,-4],[43.6,-8],[42,-8.9],[40,-8.9],[38.7,-9.4],[37,-9],[37.1,-7.5],[36.2,-6],[36,-5.6],[36.7,-4.4],[36.7,-2.2],[37.6,-0.7],[38.7,0.1],[39.5,-0.3],[41,1],[42.4,3.2],[43.3,3.6],[43.4,5.2],[43.5,7],[44.4,8.9],[44,10],[42.5,11.1],[41.2,13.3],[40.6,14.3],[39.9,15.6],[38,15.6],[38.1,16.6],[39.5,17.1],[40.5,17.9],[40.1,18.5],[41.2,16.5],[42,15.2],[43.6,13.5],[44.5,12.3],[45.6,12.4],[45.7,13.7],[44.8,13.9],[43.5,16.3],[42.5,18.2],[41.4,19.5],[40,19.4],[39,20.7],[38.3,21.5],[37,21.7],[36.5,22.4],[37.5,23.1],[38.2,24.1],[39.4,23],[40.6,22.9],[40.9,26.2],[40.1,26.3],[39,26.8],[37.8,27.2],[36.8,28.2],[36.2,29.6],[36.8,30.6],[36.2,32.8],[36.6,34.6],[36.8,36],[35.5,35.8],[34.4,35.8],[33.1,35.1],[32,34.7],[31.3,34.2],[31.1,33.5],[29.9,32.6],[27.8,34.3],[29.5,34.9],[28,35],[26.5,36.3],[24.2,37.7],[22,39],[20,40.2],[17.2,42.5],[15,42.9],[13,43.4],[12.7,45],[13.5,47.6],[14.5,49],[15.6,52.2],[16.7,53.6],[17.9,56.3],[19.7,57.7],[21,59],[22.5,59.8],[23.6,58.6],[24.6,56.6],[26.4,56.4],[25.4,56.2],[24.1,53.8],[24.2,52],[25.6,51.6],[26.2,50.1],[27.6,48.8],[29.4,48],[30,48.9],[29.3,50.6],[27.6,52.3],[26.9,54.8],[27.1,56.3],[25.7,57.3],[25.3,59.5],[25.2,61.6],[25.3,64],[25.3,66.7],[24.8,67],[23.8,67.6],[22.7,68.6],[22.4,69.2],[21.6,69.4],[20.8,70.5],[21.1,71.6],[22.2,72.6],[21.7,72.8],[21.1,72.7],[19.1,72.8],[17,73.3],[15.5,73.8],[13.9,74.5],[12.2,74.9],[10.4,75.9],[8.9,76.5],[8.1,77.5],[9.2,78.4],[10.3,79.3],[11.8,79.8],[13.3,80.3],[15.6,80.2],[16.3,81.6],[17.6,83.2],[19.3,84.9],[20.6,86.9],[21.6,87.4],[21.8,89],[22.4,90.4],[21.6,91.8],[20.4,92.4],[18.6,93.7],[16.5,94.4],[16.3,96.3],[16.4,97.6],[14.1,98.1],[12.5,98.7],[10,98.5],[8,98.3],[6.5,100],[4,100.6],[2.7,101.4],[1.4,103.6],[1.6,104.2],[4,103.4],[5.8,102.6],[6.9,101.3],[8.4,100.2],[10.3,99.2],[12.5,99.9],[13.5,100.1],[12.6,101.5],[11.6,103],[10.5,104.3],[8.7,104.8],[9.6,106.5],[10.5,107.3],[11.4,109],[12.9,109.4],[15.2,108.9],[16.4,107.7],[18.1,106.4],[19.8,105.8],[20.9,106.8],[21.6,108.1],[21.5,109.7],[20.3,110.2],[21,110.7],[21.6,111.7],[22.4,113.6],[22.8,115.5],[23.6,117.3],[24.6,118.6],[26,119.6],[27.5,120.6],[29,121.8],[30.6,122],[31.7,121.7],[32.6,120.8],[34.4,119.6],[35.2,119.3],[36.6,120.9],[37.4,122.5],[37.6,121],[37.5,119.6],[38.3,118.8],[39,117.7],[39.3,119.2],[40,119.9],[40.9,121.4],[40,121.9],[39,121.3],[39.9,124.3],[38.8,125.2],[37.7,126.2],[36.9,126.4],[35.1,126.3],[34.5,126.9],[34.8,128.6],[35.4,129.4],[36.6,129.4],[38.2,128.6],[39.4,127.5],[40.4,129.2],[41.7,129.8],[42.6,130.6],[43.1,131.9],[44.8,135.8],[47.2,138.6],[50.2,140.6],[52.6,141.4],[54,140],[54.7,137],[56.4,138.4],[59.3,143],[59.4,148.5],[59.6,152],[62,152]],
+  // Mediterranean islands
+  [[38.2,12.5],[38.3,15.6],[36.7,15.1],[37.5,12.6]],
+  [[41.2,9.2],[40.9,9.8],[39.1,9.6],[38.9,8.5],[40.5,8.2]],
+  [[43,9.4],[41.4,9.2],[41.8,8.6]],
+  [[35.5,23.6],[35.3,26.3],[35,26],[35.2,23.5]],
+  [[35.6,34.6],[34.6,33],[34.9,32.3],[35.4,33.5]],
+  // Britain, Ireland
+  [[58.5,-3.1],[57.6,-1.8],[55.8,-1.6],[54,-0.2],[53,0.3],[51.4,1.4],[50.8,0.3],[50.5,-3.5],[50,-5.7],[51.7,-5],[52.5,-4.2],[53.3,-3],[54.5,-3.4],[55.5,-4.8],[56.5,-6],[58.5,-5]],
+  [[55.2,-7.5],[54,-6],[52.2,-6.4],[51.5,-9.7],[53.5,-10.1],[54.3,-8.6]],
+  // Africa
+  [[35.8,-5.9],[35.2,-2.5],[36.8,3],[37,10.2],[36.5,10.8],[35,11],[33.8,10.1],[32.8,13],[30.5,19],[32.5,20.5],[32.8,22.5],[31.5,25.2],[31.3,30],[31.2,32.3],[29.9,32.6],[27,33.9],[24,35.6],[21,37],[18,38.5],[15.5,39.6],[12.6,43.3],[11.5,43.5],[10.5,44.5],[11.8,51.2],[9,50.8],[5,48],[2,45.5],[-1.5,41.8],[-4,39.7],[-6.8,39.3],[-8.9,39.5],[-10.5,40.4],[-15,40.7],[-17.8,37],[-20,35],[-24,35.5],[-25.9,32.7],[-28.5,32.4],[-30.9,30.4],[-33.9,25.6],[-34.4,21],[-34.4,18.5],[-31,17.6],[-28.6,16.4],[-22.9,14.4],[-17.3,11.7],[-12.5,13.6],[-8.8,13.2],[-6,12.2],[-3.8,11.1],[-0.6,9.3],[2.2,9.8],[3.9,9.4],[4.6,8],[4.3,6.1],[6.4,3.4],[5.6,0],[5.1,-1.3],[4.9,-2.3],[5.2,-4],[4.4,-7.5],[6.3,-10.8],[7.5,-13],[9.5,-13.7],[11,-15],[12.5,-16.8],[14.7,-17.5],[16.5,-16.3],[21,-17],[24,-16],[27.7,-13.2],[30.4,-9.8],[33.5,-7.6]],
+  // Madagascar, Sri Lanka
+  [[-12,49.3],[-15.5,50.5],[-20,48.9],[-25.2,47],[-25,44],[-21.5,43.3],[-16,44.5],[-13.4,48.2]],
+  [[9.8,80],[8.5,81.3],[6.5,81.8],[6,80.5],[7.5,79.8]],
+  // Japan
+  [[41.5,140],[41.2,141.4],[40.4,141.8],[38.3,141.5],[37,140.9],[35.7,140.9],[34.9,139.9],[34.6,138.2],[34.2,136.8],[33.5,135.8],[34.3,135.1],[34.1,132.5],[33.9,131],[34.4,131.4],[35.5,133.1],[35.6,135.4],[36.1,136.1],[37.4,136.8],[37,137.4],[37.9,138.9],[39.3,139.9],[40.6,139.9]],
+  [[33.95,131],[33.2,131.9],[31.4,131.4],[31,130.6],[31.5,130.2],[32.7,129.7],[33.5,129.9]],
+  [[34.2,133],[34.2,134.6],[33.3,134.2],[32.8,132.9]],
+  [[45.4,141.9],[44.3,145.3],[43.3,145.8],[42,143.3],[41.4,140.1],[42.6,139.9],[43.2,141.3]],
+  // Taiwan, Hainan
+  [[25.3,121.6],[24.6,121.9],[22,120.8],[23,120.1],[24.6,120.7]],
+  [[20.1,110.4],[19.7,111],[18.2,109.6],[19.3,108.6],[20,109.6]],
+  // Philippines
+  [[18.6,120.6],[18.5,122.3],[16.3,122],[14.2,124],[13.6,123],[14.3,120.6],[15.5,119.9],[16.5,120.3]],
+  [[12.5,124.4],[11,125.7],[10,125.1],[9.6,123.4],[10.5,121.9],[11.8,121.9]],
+  [[9.8,125.5],[8,126.4],[6.3,126.2],[5.9,125.2],[6.9,122],[8.6,123.8],[9,125]],
+  // Borneo, Sumatra, Java, Sulawesi, Halmahera, Seram, Timor
+  [[7,116.9],[6,118.2],[5,119.3],[2,118],[1,118.9],[-1,116.9],[-2.6,116.5],[-4,114.6],[-3.3,113],[-3.1,111],[-1.3,110],[0.8,108.9],[1.7,109.6],[2.3,111.2],[2.9,113],[4.6,114.8],[5.9,116]],
+  [[5.6,95.3],[5.2,97.5],[3.6,98.8],[2.2,100.3],[1,102.6],[-0.5,103.6],[-2.4,105.9],[-3.8,106],[-5.9,105.8],[-5.5,104.5],[-4.1,102.3],[-2.4,100.8],[-0.6,100.2],[1.8,98.8],[3.8,96.4]],
+  [[-6,106],[-6.1,108.3],[-6.6,110.6],[-6.9,112.6],[-7.6,114.5],[-8.6,114.4],[-8.3,111],[-7.7,108.6],[-7.4,106.4],[-6.8,105.3]],
+  [[1.4,125],[0.6,122],[0.3,120.3],[-1.5,119.7],[-5.5,119.5],[-5.2,120.6],[-2.8,121.2],[-4.2,122.6],[-2.2,122.6],[-1,123.4],[0.2,121.2]],
+  [[2.2,128],[1,128.7],[0.4,127.9],[-0.8,128.3],[0.6,127.6]],
+  [[-2.8,128],[-2.9,130.8],[-3.6,130.6],[-3.4,128.2]],
+  [[-8.4,127],[-9,125.2],[-10.3,123.5],[-9.6,124.4]],
+  [[-8.3,119.9],[-8.4,123],[-8.9,122.8],[-8.8,120]],
+  // New Guinea, Australia
+  [[-0.8,131],[-1.4,134],[-2.6,138],[-2.6,141],[-3.9,144.5],[-5.5,146.5],[-6.5,147.8],[-10.2,150],[-8.6,146.6],[-7.8,144],[-9.1,142.5],[-8.4,140],[-6.7,138.5],[-4.8,136],[-4.1,133.2],[-3.4,132],[-2.6,132.3],[-1.5,131]],
+  [[-12,130.5],[-11,132],[-12.2,136.8],[-14.5,135.5],[-16,136.5],[-17.6,140.7],[-11,142.5],[-15,145.3],[-19,146.5],[-22,149.5],[-24,152],[-38,152],[-38.5,146],[-38,140],[-35.5,138.5],[-35,137.5],[-32,133.5],[-31.5,129],[-33.8,123.5],[-34.5,118],[-34.5,115],[-31,115.5],[-27,113.5],[-22,113.8],[-20.3,118.6],[-17,122.5],[-14.5,125.5],[-15,129]]
+];
+
+const LAKES = [
+  [[41.2,29],[41.6,31.5],[42,33.5],[41.7,35.5],[41.3,36.8],[41,38.5],[41.1,40.2],[41.6,41.6],[42.6,41.5],[43.4,40],[44.5,38.2],[45.2,36.6],[45.4,35],[44.4,33.6],[45.3,32.6],[46.2,31],[46.5,30.8],[45.2,29.7],[44,28.6],[42.6,27.7],[41.6,28.1]],
+  [[46.9,49.9],[46.6,52.7],[45.2,53.1],[44.6,50.6],[42.5,52.6],[41,52.9],[39.5,53.4],[37.4,53.9],[36.8,51.8],[37.5,49.3],[38.9,48.9],[40.3,50.2],[41.5,48.9],[43,47.5],[44.3,47.2],[45.6,47.7]]
+];
+
+const ROUTES = [
+  { name: "Cape route", kind: "sea", pts: [[38.4,-10],[30,-18],[12,-25],[-5,-22],[-25,-10],[-37,15],[-35,30],[-22,41],[-10,44],[2,52],[9,66],[11,74]], label: [-30,0] },
+  { name: "", kind: "sea", pts: [[11,74],[6,82],[5,94],[3,100.5]] },
+  { name: "", kind: "sea", pts: [[2,103],[-2,107],[-5,114],[-5,122],[-3.6,127]] },
+  { name: "Atlantic system", kind: "sea", pts: [[36.6,-7.5],[28,-20],[20,-45],[18.2,-66]], label: [23,-36] },
+  { name: "", kind: "sea", pts: [[21,-72],[28,-72],[35,-62],[40,-40],[40,-20],[38,-10]] },
+  { name: "Middle Passage", kind: "forced", pts: [[3.6,-0.6],[0,-14],[-6,-27],[-12.6,-37.5]], label: [-1.5,-20] },
+  { name: "", kind: "forced", pts: [[3.6,-0.6],[8,-22],[13,-45],[18.2,-69.5]] },
+  { name: "", kind: "forced", pts: [[-10.2,13],[-13,-5],[-13.2,-37.6]] },
+  { name: "Manila galleons", kind: "sea", pts: [[16.8,-99.9],[14.5,-105],[13.5,-112]], label: [11.6,-97.5] },
+  { name: "", kind: "sea", pts: [[13,148],[13.2,135],[14.4,121.4]] },
+  { name: "Silk Roads, overland", kind: "land", pts: [[39.9,116.4],[40,100],[39.5,76],[39.6,67],[36,59],[35.7,51.4],[36.2,37.2],[41,29]], label: [42.8,82] }
+];
+
+const CITIES = [
+  { name: "Lisbon", lat: 38.7, lon: -9.1, dx: -4, anchor: "end" },
+  { name: "Seville", lat: 37.4, lon: -6.0, dx: 4, anchor: "start", dy: 9 },
+  { name: "Amsterdam", lat: 52.4, lon: 4.9, dx: 4, anchor: "start" },
+  { name: "Agra", lat: 27.2, lon: 78.0, dx: 4, anchor: "start" },
+  { name: "Beijing", lat: 39.9, lon: 116.4, dx: -4, anchor: "end" }
+];
+
+const OCEANS = [
+  { name: "Atlantic Ocean", lat: 30, lon: -48 },
+  { name: "Indian Ocean", lat: -22, lon: 72 },
+  { name: "Pacific Ocean", lat: 1, lon: -96 },
+  { name: "South China Sea", lat: 7, lon: 110, small: true }
+];
+
+/* ============================================================
+   QUESTION BANK
+   The first option in each list is the correct answer.
+   Options are shuffled when a question is drawn.
+   Sources marked s: are written for practice from the historical record.
+   ============================================================ */
+const QUESTIONS = [
+/* ---------------- RECALL ---------------- */
+{id:"r01",t:"recall",topic:1,q:"Which navigation tool, first developed in China, helped European sailors keep a steady direction at sea?",
+ o:["Magnetic compass","Astrolabe","Lateen sail","Carrack"],
+ why:"The magnetic compass came from China and reached Europe through trade contacts. The astrolabe measured latitude, the lateen sail is a sail design, and the carrack is a ship."},
+{id:"r02",t:"recall",topic:1,q:"What did the astrolabe help sailors figure out?",
+ o:["Their latitude, by measuring the angle of the sun or stars","The direction of magnetic north","The depth of the water near a coast","How much cargo a ship could safely carry"],
+ why:"The astrolabe, a Greek design refined by scholars in the Islamic world, measured how high the sun or stars stood above the horizon to find latitude."},
+{id:"r03",t:"recall",topic:1,q:"What made the lateen sail so useful?",
+ o:["Its triangular shape could catch wind from either side, allowing more precise sailing","It was made of silk, so it weighed very little","It let ships carry heavier cannons","It could be folded up and used as a tent on land"],
+ why:"The triangular lateen sail, long used by Arab sailors, let ships sail at an angle to the wind instead of only with it."},
+{id:"r04",t:"recall",topic:1,q:"Which ship was small and nimble enough to explore shallow coasts and sail up rivers?",
+ o:["The Portuguese caravel","The Dutch fluyt","The Chinese junk","The Portuguese carrack"],
+ why:"The Portuguese built the caravel small on purpose, so it could enter shallow coastal waters and rivers. It was also fast and could mount cannons."},
+{id:"r05",t:"recall",topic:1,q:"Why was the Dutch fluyt so successful?",
+ o:["It had huge cargo holds, needed small crews, and was cheap to build","It was the fastest warship in Europe","It could sail far up African rivers","It was designed to carry settlers to the Americas"],
+ why:"The fluyt was built purely for trade. Because it was cheap to build and run, fluyts carried about half of Europe’s shipping by the mid-1600s."},
+{id:"r06",t:"recall",topic:1,q:"How did Europeans mostly get the compass, the astrolabe, and the lateen sail?",
+ o:["They adopted them from other cultures through trade contacts","They invented them in Portuguese navigation schools","They captured them from Ming treasure ships","They bought them from the Inca"],
+ why:"Europeans adopted these tools from China and the Islamic world through merchant contact along trade routes, contact the Pax Mongolica had helped make possible."},
+{id:"r07",t:"recall",topic:2,q:"Who sponsored Portugal’s first voyages down the west coast of Africa?",
+ o:["Prince Henry the Navigator","Ferdinand Magellan","Queen Isabella","Vasco da Gama"],
+ why:"Prince Henry brought together sailors, mapmakers, and shipbuilders to push down the African coast in search of gold, spices, Christian allies, and converts."},
+{id:"r08",t:"recall",topic:2,q:"Who reached India in 1498 by sailing around the southern tip of Africa?",
+ o:["Vasco da Gama","Christopher Columbus","Ferdinand Magellan","Henry Hudson"],
+ why:"Vasco da Gama reached Calicut in 1498, opening an all-water route from Europe into the Indian Ocean trade."},
+{id:"r09",t:"recall",topic:2,q:"Who paid for Columbus’s 1492 voyage?",
+ o:["Ferdinand and Isabella of Spain","The Portuguese crown","Elizabeth I of England","The Dutch East India Company"],
+ why:"Portugal turned Columbus down, so he took his westward plan to the Spanish monarchs, who agreed to fund it."},
+{id:"r10",t:"recall",topic:2,q:"What did Magellan’s expedition (1519–1522) accomplish?",
+ o:["It sailed around South America and across the Pacific to Asia","It found a northwest passage through Canada","It founded the first English colony in America","It reached India by sailing around Africa"],
+ why:"Sailing for Spain, Magellan’s fleet rounded South America and crossed the Pacific. Magellan died in the Philippines, but survivors completed the first circumnavigation."},
+{id:"r11",t:"recall",topic:2,q:"What mainly drew the French to North America?",
+ o:["The fur trade","Silver mines","Sugar plantations","A route to China they had already found"],
+ why:"The French never found a westward passage to Asia, but they built a profitable fur trade and founded Quebec in 1608 under Samuel de Champlain."},
+{id:"r12",t:"recall",topic:2,q:"Which was England’s first permanent colony in the Americas?",
+ o:["Jamestown (1607)","Roanoke (1580s)","Quebec (1608)","New Amsterdam (1620s)"],
+ why:"Sir Walter Raleigh’s Roanoke colony failed. Jamestown, founded in 1607, was the first English colony that lasted."},
+{id:"r13",t:"recall",topic:2,q:"Henry Hudson’s 1609 voyage for the Dutch led to which colony?",
+ o:["New Amsterdam","Quebec","Jamestown","Batavia"],
+ why:"Hudson explored the river later named for him, and the Dutch founded New Amsterdam there in the 1620s. It later became New York."},
+{id:"r14",t:"recall",topic:2,q:"Which European state built a “trading-post empire” of fortified ports rather than large colonies?",
+ o:["Portugal","Spain","France","England"],
+ why:"Full colonies were expensive, so Portugal built fortified trading posts from West Africa to Southeast Asia and used them to control trade by force."},
+{id:"r15",t:"recall",topic:3,q:"What was the Columbian Exchange?",
+ o:["The transfer of plants, animals, and diseases between the Eastern and Western Hemispheres","A market in Seville where colonial goods were bought and sold","The treaty that divided the Americas between Spain and Portugal","The trade route between Acapulco and Manila"],
+ why:"The Columbian Exchange began with Columbus’s contact in 1492 and moved crops, livestock, and germs in both directions across the Atlantic."},
+{id:"r16",t:"recall",topic:3,q:"Which disease killed the most Indigenous Americans after European contact?",
+ o:["Smallpox","Malaria","Measles","Cholera"],
+ why:"Smallpox was the deadliest. Together with other diseases, it killed up to 90 percent of the population in some areas, a catastrophe known as the Great Dying."},
+{id:"r17",t:"recall",topic:3,q:"Which disease reached the Americas through mosquitoes carried on ships, including slave ships from Africa?",
+ o:["Malaria","Smallpox","Measles","Plague"],
+ why:"Malaria spread through mosquitoes that arrived with ships carrying enslaved Africans, and it killed millions of Indigenous Americans."},
+{id:"r18",t:"recall",topic:3,q:"Which crops traveled from the Americas to Afro-Eurasia?",
+ o:["Maize, potatoes, and manioc","Wheat, grapes, and olives","Sugar, bananas, and rice","Coffee, tea, and cotton"],
+ why:"American crops like maize, potatoes, and manioc (cassava) diversified diets in Europe, Africa, and Asia. Wheat, grapes, and olives went the other way."},
+{id:"r19",t:"recall",topic:3,q:"Which animal brought by Europeans transformed life for Native peoples of the North American plains?",
+ o:["The horse","The sheep","The pig","The goat"],
+ why:"Horses let several Plains peoples hunt bison far more effectively, reshaping their societies."},
+{id:"r20",t:"recall",topic:3,q:"Which foods did enslaved Africans bring to the Americas?",
+ o:["Okra and rice","Potatoes and maize","Wheat and olives","Tomatoes and cacao"],
+ why:"Enslaved Africans brought okra and rice. Their knowledge of growing rice shaped plantation agriculture in places like Carolina."},
+{id:"r21",t:"recall",topic:3,q:"What is cash cropping?",
+ o:["Growing a crop mainly to sell or export rather than to eat","Paying farm workers in silver coins","Growing many different crops on one small farm","Trading crops for gold at prices set by the church"],
+ why:"Cash crops like sugar, tobacco, and rice were grown on large plantations, usually with coerced labor, for export to distant markets."},
+{id:"r22",t:"recall",topic:4,q:"What was the mit’a system under Spanish rule?",
+ o:["A labor draft that forced Indigenous men to work in mines like Potosí","A tax paid in cacao beans","A contract that bound Europeans to seven years of work","A missionary school for Indigenous children"],
+ why:"The Inca used the mit’a as a labor draft for state projects. The Spanish adapted it to force Indigenous men into silver mining."},
+{id:"r23",t:"recall",topic:4,q:"Under the encomienda system, Spanish colonists received:",
+ o:["The right to demand labor from Indigenous people in exchange for “protection” and Christian teaching","Land grants back in Spain for their service","Enslaved Africans supplied by the crown","Monopolies on trade with China"],
+ why:"Encomienda looked a bit like European feudalism, but in practice it was coerced labor that differed little from slavery."},
+{id:"r24",t:"recall",topic:4,q:"What was a hacienda?",
+ o:["A large estate where coerced Indigenous laborers produced crops and livestock for sale","A fortified trading post on the African coast","A government office that collected silver taxes","A mission church in a Native village"],
+ why:"Haciendas focused on producing goods for profit, while the encomienda focused on controlling Indigenous people and their labor."},
+{id:"r25",t:"recall",topic:4,q:"What is indentured servitude?",
+ o:["A contract to work for several years, often seven, in exchange for passage to the colonies","Lifelong slavery passed down to children","A Spanish labor draft for silver mines","Service in a ruler’s army in exchange for land"],
+ why:"Many poor Europeans, especially in English colonies, signed indentures to pay for their passage and went free when the contract ended."},
+{id:"r26",t:"recall",topic:4,q:"What was new about chattel slavery in the Americas?",
+ o:["It was race-based and hereditary","It was the first slavery that had ever existed","Enslaved people could easily buy their freedom","It lasted only a set number of years"],
+ why:"Slavery existed long before 1450, but in the Americas it became tied to African ancestry, and the children of enslaved mothers were born enslaved."},
+{id:"r27",t:"recall",topic:4,q:"What happened to the Gujarati merchants of the Mughal Empire as Europeans entered the Indian Ocean?",
+ o:["They kept trading, and many grew richer","They were driven out of business entirely","They moved their trade to the Atlantic","They became sailors in the Portuguese navy"],
+ why:"Long-established Asian merchants kept using the Indian Ocean network, and European demand increased many of their profits. That is an important continuity."},
+{id:"r28",t:"recall",topic:4,q:"How did Tokugawa Japan respond to European missionaries?",
+ o:["It expelled them and suppressed Christianity","It made Christianity the state religion","It put them in charge of government schools","It ignored them completely"],
+ why:"The shogun saw Christian conversion as a threat to Japan’s newly won unity, so he expelled missionaries and suppressed the faith, often violently."},
+{id:"r29",t:"recall",topic:4,q:"How did the Asante Empire grow powerful?",
+ o:["By trading gold, ivory, and enslaved captives to Europeans and using the wealth to build its military","By conquering Portugal’s colonies in Brazil","By refusing all trade with Europeans","By mining silver for the Spanish"],
+ why:"Trade with the Portuguese and later the British made the Asante rich, and they used that wealth to expand their army and consolidate power."},
+{id:"r30",t:"recall",topic:4,q:"Why did the king of Kongo convert to Christianity?",
+ o:["To strengthen diplomatic and trade ties with Portugal","Because Portugal had conquered Kongo","To end the trans-Saharan trade","To join the Ottoman Empire"],
+ why:"Kongo’s rulers adopted Christianity to deepen their partnership with Portugal. The relationship enriched Kongo before it soured over the slave trade."},
+{id:"r31",t:"recall",topic:5,q:"What is mercantilism?",
+ o:["An economic policy in which the state builds wealth in gold and silver by exporting more than it imports","A system in which governments stay out of trade","Trading goods without using money","A religious rule against charging interest"],
+ why:"Mercantilists saw wealth as a fixed pie measured in bullion, so they pursued a favorable balance of trade and colonies that bought their exports."},
+{id:"r32",t:"recall",topic:5,q:"What is a joint-stock company?",
+ o:["A business funded by many investors, each of whom could lose only what they invested","A company owned entirely by a king","A guild of craftsmen who shared their tools","A bank run by the Catholic Church"],
+ why:"Investors shared the risk and the profits. States often chartered these companies and granted them trade monopolies."},
+{id:"r33",t:"recall",topic:5,q:"Which joint-stock company was chartered in 1602 with a monopoly on Dutch trade in Asia?",
+ o:["The Dutch East India Company (VOC)","The British East India Company","The Hudson’s Bay Company","The Royal African Company"],
+ why:"The VOC pushed the Portuguese out of much of the Indian Ocean spice trade, made its investors rich, and extended Dutch power."},
+{id:"r34",t:"recall",topic:5,q:"Where was the great silver mine of Potosí?",
+ o:["In the Andes, in today’s Bolivia","In central Mexico","On the Gold Coast of West Africa","In southern Japan"],
+ why:"Potosí was the largest source of silver in the world, and much of its silver ended up in China."},
+{id:"r35",t:"recall",topic:5,q:"What are creole languages?",
+ o:["New languages that blend European, African, and sometimes Indigenous languages","Languages spoken only by Spanish nobles","Secret codes used by pirates","The official languages of the Inca empire"],
+ why:"Enslaved Africans from many language groups developed creole languages within about a generation, an example of cultural synthesis."},
+{id:"r36",t:"recall",topic:5,q:"Who was Bartolomé de las Casas?",
+ o:["A Dominican priest who protested Spanish abuse of Indigenous people","A conquistador who defeated the Inca","The Portuguese captain who reached Brazil","A Spanish monarch who expelled the Jews"],
+ why:"Las Casas’s protests helped produce laws outlawing the enslavement of Indigenous Americans and limiting the forced labor they could be made to do."},
+{id:"r37",t:"recall",topic:6,q:"What was the Fronde?",
+ o:["A revolt in France against new taxes and growing royal power","A Spanish colony in North America","A Dutch warship design","The treaty that ended the Thirty Years’ War"],
+ why:"Nobles led the Fronde (1648–1653) as royal power grew. It was crushed, and the French monarchy came out stronger."},
+{id:"r38",t:"recall",topic:6,q:"Who was Queen Nzinga?",
+ o:["A ruler of Ndongo and Matamba who resisted the Portuguese","A Mughal empress who governed Surat","An Asante queen who traded with the British","A queen of Kongo who converted to Islam"],
+ why:"Nzinga allied with the Dutch and with Kongo and fought Portuguese encroachment in west-central Africa for decades."},
+{id:"r39",t:"recall",topic:6,q:"Who led the Pueblo Revolt of 1680?",
+ o:["Popé","Túpac Amaru","Queen Nanny","Osei Tutu"],
+ why:"Popé organized Pueblo communities against Spanish forced labor and missionary abuses. They drove the Spanish out of New Mexico for about a decade."},
+{id:"r40",t:"recall",topic:6,q:"What were Maroon communities?",
+ o:["Free communities formed by people who escaped slavery","Plantations owned by free Black families","Dutch trading posts in Brazil","Spanish missions in the Caribbean"],
+ why:"Maroons lived in hard-to-reach places like the mountains of Jamaica. Jamaica’s Maroons fought the British until treaties recognized their freedom."},
+{id:"r41",t:"recall",topic:6,q:"What happened in the Stono Rebellion of 1739?",
+ o:["Enslaved people in South Carolina seized weapons and rose against their enslavers","Pueblo people drove the Spanish out of New Mexico","French nobles revolted against new taxes","Japanese Christians rebelled against the shogun"],
+ why:"The local militia crushed the rebellion, but it terrified slaveholding colonies, which passed harsher laws."},
+{id:"r42",t:"recall",topic:7,q:"What did Spain do to its Jewish population in 1492, after completing the Reconquista?",
+ o:["Ordered all Jews who would not convert to leave","Made Judaism an official religion","Sent them to found colonies in the Americas","Gave them control of Seville’s trade"],
+ why:"Spain’s monarchs ordered Jews to convert or leave. Portugal soon did the same, while the Ottoman Empire took in many of the refugees."},
+{id:"r43",t:"recall",topic:7,q:"Which state welcomed many of the Jews expelled from Spain?",
+ o:["The Ottoman Empire","France","Ming China","The Inca Empire"],
+ why:"The Ottomans offered relative tolerance. Jews could prosper in trade and even rise at court, though as non-Muslims they paid the jizya tax."},
+{id:"r44",t:"recall",topic:7,q:"How did the Qing dynasty treat China’s Han majority?",
+ o:["It reserved top offices for Manchus and required Han men to wear the Manchu queue","It banned Han people from taking the civil service exam","It made Han Chinese the ruling elite","It forced Han people to convert to Christianity"],
+ why:"The Manchu kept the civil service exam but gave the highest posts to Manchus. The required queue hairstyle was a daily reminder of foreign rule."},
+{id:"r45",t:"recall",topic:7,q:"In the Spanish casta system, who were peninsulares?",
+ o:["People born in Spain or Portugal","People of European descent born in the Americas","People of mixed European and Indigenous ancestry","Enslaved Africans"],
+ why:"Peninsulares, born on the Iberian Peninsula, sat at the top. Creoles, of European descent but born in the Americas, ranked just below them."},
+{id:"r46",t:"recall",topic:7,q:"In the casta system, a mestizo was a person of:",
+ o:["European and Indigenous ancestry","European and African ancestry","African and Indigenous ancestry","Spanish birth living in the Americas"],
+ why:"Mestizos had European and Indigenous ancestry, mulattoes European and African, and zambos African and Indigenous."},
+{id:"r47",t:"recall",topic:7,q:"How did Peter the Great weaken Russia’s boyars?",
+ o:["He took away their rank and tied status to service to the state","He gave them command of the army","He let them elect the czar","He exiled every one of them to Siberia"],
+ why:"Peter centralized power, crushed boyar resistance, and made government positions depend on serving the state directly."},
+{id:"r48",t:"recall",topic:7,q:"What happened to Ottoman timars, the land grants given for military service?",
+ o:["Sultans increasingly turned them into tax farms that sent revenue to the state","They were given to Jewish merchants","They became independent kingdoms","They were sold to European trading companies"],
+ why:"As timar holders died, sultans converted the grants into tax farms, leaving the old landed elite with less land and less power."},
+{id:"r49",t:"recall",topic:7,q:"Which Mughal emperor was known for religious tolerance and for ending the jizya tax?",
+ o:["Akbar","Aurangzeb","Babur","Shah Jahan"],
+ why:"Akbar ended the jizya and funded places of worship for several faiths. A later emperor, Aurangzeb, brought the tax back."},
+{id:"r50",t:"recall",topic:4,q:"Where did Spain set up its main base in Asia?",
+ o:["The Philippines","Malacca","Ceylon","Macau"],
+ why:"Spain ran the Philippines, centered on Manila, as a full colony, using the same tribute and coerced labor it used in the Americas."},
+{id:"r51",t:"recall",topic:4,q:"Why did the British hold only coastal trading posts in India before 1750?",
+ o:["The Mughal Empire was too strong for them to conquer","Britain had no interest in Indian goods","The Portuguese controlled all of India","India had no usable ports"],
+ why:"Britain wanted India but lacked the military power to take it from the Mughals, so it settled for coastal posts. It moved toward colonial rule later in the 1700s."},
+{id:"r52",t:"recall",topic:4,q:"Over roughly 350 years, about how many enslaved Africans were forced onto ships bound for the Americas?",
+ o:["About 12.5 million","About 1.25 million","About 125,000","About 50 million"],
+ why:"The trans-Atlantic slave trade was far larger than the earlier Mediterranean and Indian Ocean slave trades."},
+{id:"r53",t:"recall",topic:5,q:"What was the Middle Passage?",
+ o:["The forced voyage of enslaved Africans across the Atlantic","The galleon route from Acapulco to Manila","A shipping lane through the Strait of Malacca","The overland Silk Road through Central Asia"],
+ why:"The Middle Passage was the deadly Atlantic crossing, one leg of the Atlantic system of trade."},
+{id:"r54",t:"recall",topic:5,q:"Which crop dominated Caribbean plantations?",
+ o:["Sugarcane","Cotton","Tea","Wheat"],
+ why:"Caribbean colonies specialized in sugarcane, grown and processed by enslaved Africans. As supply rose, sugar prices fell and European demand soared."},
+{id:"r55",t:"recall",topic:4,q:"How did Ming China respond to Portuguese traders in the early 1500s?",
+ o:["Officials expelled them after learning they had used bribery","The emperor gave them control of Canton","China sent a fleet to attack Lisbon","Ming merchants joined the Portuguese navy"],
+ why:"Ming policies kept tight state control over sea trade. The expulsion further isolated China from growing European power at sea."},
+{id:"r56",t:"recall",topic:5,q:"What does syncretism mean?",
+ o:["Blending different religious or cultural traditions into something new","Forcing a population to convert","Translating the Bible into local languages","Trading religious objects for silver"],
+ why:"Examples include the Virgin of Guadalupe in Mexico and Vodun in the Caribbean, which blended Christianity with Indigenous or African beliefs."},
+
+/* ---------------- SOURCE-BASED ---------------- */
+{id:"s01",t:"stimulus",topic:3,s:"Estimates vary widely, but many historians conclude that the population of central Mexico fell by roughly 90 percent between about 1519 and 1600.",
+ q:"Which factor most directly explains the change described?",
+ o:["Epidemic diseases such as smallpox introduced from the Eastern Hemisphere","A collapse in maize harvests caused by European livestock","Mass migration of Indigenous people to Spain","Wars between the Aztec and Inca empires"],
+ why:"Native Americans had never been exposed to smallpox, measles, and other Afro-Eurasian diseases, so they had no acquired immunity."},
+{id:"s02",t:"stimulus",topic:3,s:"Estimates vary widely, but many historians conclude that the population of central Mexico fell by roughly 90 percent between about 1519 and 1600.",
+ q:"Which later development was most directly a consequence of the change described?",
+ o:["Colonizers relied more and more on enslaved African labor","The Spanish abandoned their American colonies","Indigenous empires reconquered Spanish settlements","Europe stopped importing American silver"],
+ why:"With the Indigenous labor force devastated, colonizers turned to the Atlantic slave trade to work mines and plantations."},
+{id:"s03",t:"stimulus",topic:5,s:"Silver mined at Potosí was shipped to Spain on treasure fleets. Much of it also crossed the Pacific on galleons from Acapulco to Manila, where it bought Chinese silk and porcelain. Ming China had begun requiring that taxes be paid in silver.",
+ q:"The movement of silver described above most directly reflects:",
+ o:["Chinese demand for silver linking the Americas to Asian markets","Spain’s favorable balance of trade with China","The decline of trade in the Indian Ocean","The spread of American food crops to Asia"],
+ why:"China’s demand for silver, driven partly by taxes paid in silver, pulled American bullion around the globe and helped create the first truly global trade network."},
+{id:"s04",t:"stimulus",topic:5,s:"Silver mined at Potosí was shipped to Spain on treasure fleets. Much of it also crossed the Pacific on galleons from Acapulco to Manila, where it bought Chinese silk and porcelain. Ming China had begun requiring that taxes be paid in silver.",
+ q:"A mercantilist official in Spain would most likely view the silver flowing to Manila as:",
+ o:["A drain on Spain’s wealth that should be limited","A healthy sign of a favorable balance of trade","Unimportant, since mercantilists measured wealth in land","A useful way to spread Christianity in China"],
+ why:"Mercantilists measured national wealth in gold and silver, so bullion leaving the empire to pay for imports looked like a loss."},
+{id:"s05",t:"stimulus",topic:5,s:"In 1602 the Dutch government granted the United East India Company the sole right to Dutch trade east of the Cape of Good Hope. The charter let the company build forts, keep soldiers, and make treaties with Asian rulers. Shares were sold to investors across the Netherlands.",
+ q:"The charter best illustrates which development?",
+ o:["States and private investors cooperating through joint-stock companies to expand empire","A monarch paying for exploration directly from the royal treasury","The rejection of mercantilism in favor of free trade","Asian states limiting European trade"],
+ why:"The VOC was privately funded but state-chartered, with monopoly rights and military powers. The state gained influence, and merchants gained protection."},
+{id:"s06",t:"stimulus",topic:4,s:"Edicts issued in the 1630s forbade Japanese people from traveling abroad, expelled the Portuguese, and banned Christianity. Dutch merchants were allowed to stay but were confined to the small island of Dejima in Nagasaki harbor.",
+ q:"These policies were mainly a response to:",
+ o:["Fears that Christian conversion and European influence threatened the shogun’s new unification","A Ming invasion of Japan","A collapse in Japanese silver mining","Japanese demand for European textiles"],
+ why:"Many Japanese had converted to Christianity, which the Tokugawa shogun saw as a recipe for renewed division. Restricting contact protected the new political order."},
+{id:"s07",t:"stimulus",topic:4,s:"Edicts issued in the 1630s forbade Japanese people from traveling abroad, expelled the Portuguese, and banned Christianity. Dutch merchants were allowed to stay but were confined to the small island of Dejima in Nagasaki harbor.",
+ q:"Why were the Dutch allowed to keep trading when the Portuguese were expelled?",
+ o:["The Dutch focused on trade and did not push missionary work","The Dutch had defeated Japan’s navy","The Dutch had converted to Buddhism","The Portuguese had stopped buying Japanese silver"],
+ why:"Portuguese trade was closely tied to Catholic missionaries. The Protestant Dutch traded without trying to convert anyone, so the shogun saw them as less of a threat."},
+{id:"s08",t:"stimulus",topic:6,s:"In 1680, Pueblo communities coordinated by the leader Popé rose against Spanish colonists, killing missionaries and settlers and driving the Spanish out of New Mexico. Spanish forces returned in 1692.",
+ q:"The events described are best understood as an example of:",
+ o:["Resistance to state expansion and missionary pressure in the Americas","Cooperation between colonists and Indigenous peoples","European rivalry over American colonies","The spread of American crops to Europe"],
+ why:"The Pueblo had suffered forced labor, disease, and attacks on their religion. The revolt succeeded for a time, but Spain reasserted control."},
+{id:"s09",t:"stimulus",topic:6,s:"In the late 1730s, after years of failed military campaigns, British authorities in Jamaica signed treaties recognizing the freedom and lands of Maroon communities in the island’s mountainous interior.",
+ q:"The treaties suggest that:",
+ o:["Resistance by people who escaped slavery could force colonial authorities to negotiate","British colonists in Jamaica opposed slavery","The British government had founded the Maroon communities","Jamaica had no plantation economy"],
+ why:"Colonial militias could not defeat the well-defended Maroons, so the British settled for recognizing them. The treaties also required Maroons to return future escapees, a sign of how limited that recognition was."},
+{id:"s10",t:"stimulus",topic:4,s:"Records of the trans-Atlantic slave trade show that about two males were transported for every female. Plantation owners in the Americas wanted laborers for heavy agricultural work, especially growing sugar.",
+ q:"Which effect on West African societies is most directly connected to this pattern?",
+ o:["A gender imbalance that contributed to more polygynous marriages","A rapid increase in West Africa’s male population","The end of slavery within Africa","The migration of West African women to Europe"],
+ why:"Losing so many men left West African societies with more women than men, which encouraged polygyny, the practice of a man marrying more than one woman."},
+{id:"s11",t:"stimulus",topic:4,s:"In the Ottoman Empire, many enslaved people worked in households, and some held important military or government posts. In the Caribbean, most enslaved people worked on sugar plantations, and their children were born enslaved.",
+ q:"Which statement best explains the difference described?",
+ o:["Atlantic slavery centered on plantation labor and became race-based and hereditary","Ottoman slavery was larger in scale than the Atlantic slave trade","Caribbean slavery was voluntary and temporary","Ottoman slavery was limited to enslaved men"],
+ why:"Older slave systems in the Islamic world continued, but Atlantic slavery was new in its scale, its plantation focus, and its link to race and birth."},
+{id:"s12",t:"stimulus",topic:7,s:"After taking Beijing in 1644, the Qing rulers ordered Han Chinese men to shave the front of their heads and wear a long braid called a queue, in the Manchu style. Refusing could mean death.",
+ q:"This order best illustrates:",
+ o:["A ruling ethnic minority asserting authority over the majority","The spread of Christianity in China","The weakening of the Chinese state after European contact","Chinese adoption of European fashions"],
+ why:"The Manchu were outsiders ruling a Han majority. The queue was a visible, daily reminder of who held power, alongside policies reserving top posts for Manchus."},
+{id:"s13",t:"stimulus",topic:7,s:"Eighteenth-century casta paintings from New Spain show families labeled by ancestry, such as Spanish, Indigenous, African, mestizo, and mulatto, arranged in a ranked sequence.",
+ q:"The paintings best reflect:",
+ o:["A social hierarchy in Spanish America based on race and ancestry","The equal status of all Catholics in the colonies","The influence of Ottoman art in Mexico","The decline of Spanish power in the Americas"],
+ why:"The casta system ranked colonial society by ancestry, with peninsulares and creoles at the top and Indigenous and African people at the bottom."},
+{id:"s14",t:"stimulus",topic:5,s:"According to tradition, in 1531 the Virgin Mary appeared to an Indigenous man, Juan Diego, near Mexico City and spoke to him in Nahuatl. Her image, the Virgin of Guadalupe, became central to Mexican Catholicism. Her shrine stands on a hill associated with an earlier Mexica mother goddess.",
+ q:"The Virgin of Guadalupe tradition is best seen as an example of:",
+ o:["Syncretism blending Christian and Indigenous traditions","Indigenous rejection of Christianity","Protestant influence in the Spanish colonies","The spread of Islam to the Americas"],
+ why:"Missionaries pushed conversion, but Indigenous people often blended Christianity with older beliefs, producing new syncretic traditions."},
+{id:"s15",t:"stimulus",topic:4,s:"Spanish officials required Indigenous villages in the Andes to send a share of their adult men to work in the Potosí silver mines for months at a time. The Inca state had used a similar rotating labor draft for roads and other public projects.",
+ q:"The passage best shows:",
+ o:["Continuity and change: Spain adapted an existing labor system for colonial profit","The end of forced labor in the Andes","Spanish reliance on enslaved Africans in silver mining","The Inca adoption of Spanish labor practices"],
+ why:"The mit’a existed before the Spanish arrived. They kept its form but turned it toward extracting silver for the empire."},
+{id:"s16",t:"stimulus",topic:5,s:"Throughout the 1600s, Gujarati merchants based in Surat shipped cotton textiles across the Indian Ocean and lent money to other traders, even as Portuguese and Dutch fleets patrolled the sea lanes.",
+ q:"The passage best supports which claim about 1450–1750?",
+ o:["Existing Asian trade networks continued despite European arrival","Europeans eliminated Asian merchants from the Indian Ocean","The Mughal Empire banned overseas trade","Cotton textiles were produced mainly in Europe"],
+ why:"European naval power changed the Indian Ocean, but long-established Asian merchants kept trading, and many profited from new demand."},
+{id:"s17",t:"stimulus",topic:6,s:"In 1739, a group of enslaved people near the Stono River in South Carolina seized guns and marched south, gathering others as they went, until the colonial militia defeated them. The next year, the colony passed a law tightening control over enslaved people.",
+ q:"The colony’s response best shows that:",
+ o:["Slave resistance led authorities to strengthen systems of control","Colonists began to question slavery after the revolt","Enslaved people won new legal rights","South Carolina gave up growing rice and indigo"],
+ why:"The rebellion was crushed, and fear of future revolts led to harsher slave codes, a common pattern after rebellions."},
+{id:"s18",t:"stimulus",topic:2,s:"1415: Portugal captures Ceuta in North Africa. 1482: The Portuguese build a fort at Elmina on the Gold Coast. 1488: Bartolomeu Dias rounds the Cape of Good Hope. 1498: Vasco da Gama reaches Calicut, India.",
+ q:"The timeline best illustrates:",
+ o:["A state-sponsored effort to reach Asian trade by an all-water route around Africa","Portugal’s search for a westward route to Asia","The spread of the Columbian Exchange","Portugal’s conquest of the Mughal Empire"],
+ why:"Step by step, the Portuguese crown pushed down Africa’s coast for gold, then around the Cape to reach the spice trade directly."},
+{id:"s19",t:"stimulus",topic:3,s:"After about 1700, maize and potatoes became common crops in parts of Europe, Africa, and China. Over the same period, populations in these regions grew significantly.",
+ q:"Which conclusion is best supported?",
+ o:["American food crops contributed to population growth in Afro-Eurasia","European diseases reduced Afro-Eurasian populations","Afro-Eurasian farmers rejected American crops","Population growth caused the Columbian Exchange"],
+ why:"New crops diversified diets and grew on land that suited older staples poorly, contributing to healthier, growing populations."},
+{id:"s20",t:"stimulus",topic:6,s:"Queen Nzinga of Ndongo first negotiated with the Portuguese and even accepted baptism. When they broke their promises, she allied with the Dutch and fought Portuguese forces for decades in the mid-1600s.",
+ q:"Nzinga’s actions best demonstrate that African rulers:",
+ o:["Actively negotiated with and resisted European expansion","Had no contact with Europeans before 1750","Were united in support of Portuguese rule","Relied on the Ottoman Empire to defend them"],
+ why:"African states were not passive. Rulers like Nzinga used diplomacy, alliances with Europe’s rivals, and war to defend their power."},
+{id:"s21",t:"stimulus",topic:5,s:"In Caribbean colonies, enslaved Africans from many different language groups developed new languages that combined African grammar and vocabulary with French, English, Spanish, or Portuguese words.",
+ q:"This development is an example of:",
+ o:["Cultural synthesis resulting from the Atlantic slave trade","The spread of European languages to Asia","The preservation of a single African language","Resistance to the Columbian Exchange"],
+ why:"Creole languages formed quickly, often within a generation, as people forced together from different cultures built a shared way to communicate."},
+{id:"s22",t:"stimulus",topic:1,s:"A Portuguese carrack sailing for India in the 1500s might carry dozens of cannons, a magnetic compass, an astrolabe, and charts of the African coast drawn from earlier voyages.",
+ q:"The ship described best illustrates:",
+ o:["European ships combining adopted navigation tools with gunpowder weapons","Europeans inventing all of their own navigation technology","The decline of Portuguese sea power","Chinese control of Indian Ocean shipping"],
+ why:"Adopted tools like the compass and astrolabe got the ship there. Its cannons let the Portuguese force their way into Indian Ocean trade."},
+
+/* ---------------- REASONING ---------------- */
+{id:"c01",t:"reasoning",topic:2,q:"Causation: What was the main economic reason European states sponsored voyages to Asia?",
+ o:["To bypass the land-based empires and middlemen that made Asian spices so expensive","To find new land for growing wheat","To escape the Black Death","To sell European manufactured goods in China"],
+ why:"Land routes ran through powerful empires, so spices like pepper reached Europe at very high prices. An all-water route cut out the middlemen."},
+{id:"c02",t:"reasoning",topic:2,q:"Causation: Which political change in Europe made state-sponsored exploration possible?",
+ o:["Monarchs centralized power, built up militaries, and collected taxes more efficiently","Nobles took control of most governments","The Catholic Church took over royal treasuries","European states united under one emperor"],
+ why:"As Europe recovered from the Black Death, monarchs took power from nobles and gained the resources to pay for expensive voyages."},
+{id:"c03",t:"reasoning",topic:1,q:"Causation: Which best explains how European sailors gained access to the compass and astrolabe?",
+ o:["Contact with Muslim and Asian merchants along trade routes like the Silk Roads","Spying on Ming treasure fleets in the Atlantic","Inventing them independently in Portuguese universities","Trading with Indigenous Americans"],
+ why:"Trade connections, strengthened during the Pax Mongolica, carried Chinese and Islamic knowledge to Europe."},
+{id:"c04",t:"reasoning",topic:4,q:"Continuity: Which was a continuity in Indian Ocean trade from 1450 to 1750?",
+ o:["Asian merchants kept trading, and many profited","Portugal controlled all trade in the region","Merchants stopped relying on the monsoon winds","Europeans banned the trade in cotton textiles"],
+ why:"European fleets disrupted the network, but Middle Eastern, South Asian, East Asian, and Southeast Asian merchants kept using it."},
+{id:"c05",t:"reasoning",topic:4,q:"Change: Which was the biggest change in Indian Ocean trade after 1500?",
+ o:["European states used armed ships to dominate trade and build fortified posts","Trade in the region came to an end","Chinese fleets took control of the entire ocean","Silver replaced every other trade good"],
+ why:"The Portuguese, then the Dutch, used ship-mounted cannons to force their way in. They tried to own the network, not just join it."},
+{id:"c06",t:"reasoning",topic:4,q:"Comparison: How did Spain’s approach in Asia differ from Portugal’s?",
+ o:["Spain built a full colony in the Philippines, while Portugal mostly ran trading posts","Spain traded peacefully, while Portugal conquered India","Portugal colonized China, while Spain stayed in Africa","Their approaches were the same"],
+ why:"Spain used the same tactics it used in the Americas, including tribute and coerced labor. Portugal mostly controlled ports and sea lanes."},
+{id:"c07",t:"reasoning",topic:4,q:"Continuity: Which was a continuity in slavery from before 1450 through 1750?",
+ o:["Enslaved Africans were still traded into the Mediterranean and Indian Ocean regions","Slavery became race-based for the first time","Most enslaved people worked on sugar plantations","The scale of the slave trade stayed the same"],
+ why:"Older slave trades into the Islamic world continued, often with enslaved people working in households, even as the Atlantic trade grew."},
+{id:"c08",t:"reasoning",topic:4,q:"Change: What was the most distinctive change in slavery in the Americas?",
+ o:["Slavery became tied to race and passed from parent to child","Enslaved people could hold high government office","Slavery was limited to prisoners of war","Most enslaved people were women working in households"],
+ why:"In the Americas, Blackness became identified with slavery and was used to justify brutality, and slave status became hereditary."},
+{id:"c09",t:"reasoning",topic:3,q:"Effect: Which was a long-term effect of European livestock in the Americas?",
+ o:["Ranching economies grew, while overgrazing caused erosion that hurt Indigenous farmers","Indigenous peoples lost all their traditional foods","The Americas stopped exporting crops","American animals spread to Europe and replaced cattle"],
+ why:"With no natural predators, pigs, sheep, and cattle multiplied fast. Ranching grew, but overgrazing stripped the land and caused erosion."},
+{id:"c10",t:"reasoning",topic:5,q:"Causation: Why did mercantilism encourage European states to build colonies?",
+ o:["Colonies supplied raw materials and served as captive markets for the home country’s exports","Colonies paid no taxes to the home country","Colonies let states shrink their navies","Mercantilists believed trade should be free and open"],
+ why:"More colonies meant more buyers for exports, and more exports meant more gold and silver flowing home."},
+{id:"c11",t:"reasoning",topic:5,q:"Causation: Why were the Dutch able to push the Portuguese out of much of the Indian Ocean trade?",
+ o:["The VOC’s private investment and efficient fluyt ships gave them more resources at lower cost","Portugal stopped wanting Asian spices","The Mughal Empire invited the Dutch to replace Portugal","The Dutch had invented the magnetic compass"],
+ why:"Joint-stock funding pooled huge sums from investors, and cheap, cargo-heavy fluyts made Dutch trade efficient."},
+{id:"c12",t:"reasoning",topic:5,q:"Comparison: How did Spain and Portugal fund their overseas ventures differently from the Dutch and British?",
+ o:["Spain and Portugal relied mainly on state funding, while the Dutch and British used joint-stock companies","Spain and Portugal used joint-stock companies, while the Dutch and British relied on their kings","All four relied only on church donations","Spain and Portugal borrowed from the Ming emperor"],
+ why:"State-funded ventures were limited by royal budgets, one reason Spanish and Portuguese influence was waning by the late 1600s."},
+{id:"c13",t:"reasoning",topic:6,q:"Causation: What caused the Fronde?",
+ o:["Rising taxes to pay for war and nobles’ resentment of growing royal power","A Spanish invasion of Paris","Conflict over the fur trade in Quebec","A plague that killed the royal family"],
+ why:"The French crown needed money for war and was concentrating power. Nobles led others in revolt, but the monarchy won and grew stronger."},
+{id:"c14",t:"reasoning",topic:6,q:"Comparison: Which best compares the Pueblo Revolt and the Fronde?",
+ o:["Both resisted growing state power, but the Pueblo opposed a foreign colonizer while the Fronde opposed its own monarch","Both were led by nobles who wanted higher taxes","Both permanently ended the power they opposed","Both were revolts by enslaved people"],
+ why:"State expansion and centralization provoked resistance from many groups, inside Europe and in the colonies alike."},
+{id:"c15",t:"reasoning",topic:7,q:"Comparison: How did the treatment of Jews compare in Spain and the Ottoman Empire after 1492?",
+ o:["Spain expelled them, while the Ottomans welcomed them but required the jizya tax","Both expelled all Jews","Both granted Jews full equality","The Ottomans expelled them, while Spain welcomed them"],
+ why:"States responded to diversity very differently. Ottoman tolerance was real but relative, since Jews were not equal to Muslims."},
+{id:"c16",t:"reasoning",topic:7,q:"Causation: Why did a new elite form in Spanish America?",
+ o:["Few Spanish nobles migrated, so conquistadors and Spanish-born officials used conquest and colonial wealth to build a new hierarchy","Indigenous nobles kept all their power after the conquest","The Spanish crown banned social ranks in the colonies","Enslaved Africans were given control of the haciendas"],
+ why:"With few traditional nobles in the Americas, conquistadors and peninsulares imposed the casta system with themselves at the top."},
+{id:"c17",t:"reasoning",topic:7,q:"Comparison: What did Russia’s boyars and the Ottoman timar holders have in common in this period?",
+ o:["Both lost power as rulers centralized authority","Both gained power by trading with Europeans","Both led successful revolts against their rulers","Both were new elites created by conquest"],
+ why:"Existing elites struggled as rulers like Peter the Great and the Ottoman sultans pulled power and revenue toward the state."},
+{id:"c18",t:"reasoning",topic:3,q:"Causation: Why did Afro-Eurasian diseases kill such a high share of Indigenous Americans?",
+ o:["Indigenous Americans had never been exposed to them and had no acquired immunity","Europeans deliberately spread every disease","Indigenous Americans had no medicine of any kind","The diseases only affected people who ate European food"],
+ why:"Afro-Eurasians had shared germs for centuries through trade and built up some immunity. The Americas had been isolated from those diseases. Whether Europeans ever spread disease on purpose is debated, and there is little evidence for it."},
+{id:"c19",t:"reasoning",topic:4,q:"Causation: Why did states like the Asante and Kongo grow stronger in this period?",
+ o:["Trade with Europeans brought wealth and firearms that helped them expand","Europeans conquered and reorganized them","They cut off all contact with the Atlantic world","They received silver from Potosí"],
+ why:"Taking part in expanding trade networks fostered the growth of some African states, even as the slave trade caused enormous harm."},
+{id:"c20",t:"reasoning",topic:5,q:"Effect: What effect did the flood of American silver have on Ming China?",
+ o:["It met China’s demand for silver and further commercialized the Chinese economy","It caused China to stop trading entirely","It made China a colony of Spain","It ended Chinese production of silk"],
+ why:"China collected taxes in silver and needed huge amounts. American silver bought Chinese goods and deepened China’s commercial economy."},
+{id:"c21",t:"reasoning",topic:4,q:"Comparison: What is the key difference between the encomienda and hacienda systems?",
+ o:["Encomienda focused on controlling Indigenous people and their labor, while haciendas focused on producing goods for profit","Encomienda used enslaved Africans, while haciendas used Europeans","Encomienda was Portuguese, while haciendas were Dutch","Haciendas paid fair wages, while encomienda did not"],
+ why:"Both coerced Indigenous labor. The difference is emphasis: controlling people versus the economics of producing goods for export."},
+{id:"c22",t:"reasoning",topic:2,q:"Causation: Why did England start overseas exploration later than Spain and Portugal?",
+ o:["Its booming textile industry made investors less willing to fund risky voyages","England had no access to the sea","The pope forbade English exploration","England was busy ruling India"],
+ why:"Investors were making good money at home. After Elizabeth I defeated Spain’s attempt to invade England, she backed westward exploration."},
+{id:"c23",t:"reasoning",topic:6,q:"Effect: How did Maroon communities challenge slave societies?",
+ o:["They offered a refuge that encouraged escape and showed the limits of colonial power","They supplied plantations with workers","They helped colonists capture Indigenous people","They had no effect on colonial authorities"],
+ why:"Maroon settlements were a constant draw for enslaved people to flee, so colonial authorities often tried, and failed, to destroy them."},
+{id:"c24",t:"reasoning",topic:5,q:"Continuity: Which statement best describes the overland Silk Roads from 1450 to 1750?",
+ o:["They stayed largely under the control of Asian land-based empires","Europeans took them over completely","They were abandoned after 1500","They became the main route for American silver to reach Europe"],
+ why:"Sea routes grew, but land-based powers like Ming and Qing China kept control of the overland routes, an important continuity."},
+{id:"c25",t:"reasoning",topic:5,q:"Comparison: How did missionary efforts in Spanish America compare with those in Tokugawa Japan?",
+ o:["Missionaries won many converts in the Americas, often with syncretism, while Japan expelled them and suppressed Christianity","Both regions rejected Christianity entirely","Both regions made Christianity their only religion","Japan converted completely, while the Americas rejected Christianity"],
+ why:"Colonial power backed missionaries in the Americas. In Japan, a strong state decided Christianity was a threat and shut it down."},
+{id:"c26",t:"reasoning",topic:4,q:"Causation: Why did the Spanish rely on coerced labor in the Andes?",
+ o:["They wanted to extract huge amounts of silver from mines like Potosí","They needed soldiers to fight the Ottomans","They were building cathedrals in Spain","They wanted to grow wheat for export to Asia"],
+ why:"Silver was the empire’s great prize, and mining it took enormous labor, so the Spanish adapted the Inca mit’a."}
+];
+
+/* ============================================================
+   ENGINE: pure, deterministic. reduce(state, action, actor) -> new state
+   Randomness comes only from state.rng, so every device that runs the
+   same action on the same state gets the same result.
+   ============================================================ */
+const MAX_PLAYERS = 4, MIN_PLAYERS = 2;
+const Q_BY_TYPE = { recall: [], stimulus: [], reasoning: [] };
+const Q_BY_ID = {};
+QUESTIONS.forEach(q => { Q_BY_TYPE[q.t].push(q.id); Q_BY_ID[q.id] = q; });
+
+function rnd(st) {
+  st.rng = (st.rng + 0x6D2B79F5) | 0;
+  let t = st.rng;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function shuffled(st, arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rnd(st) * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+class GameError extends Error {}
+function fail(msg) { throw new GameError(msg); }
+
+function newGame({ mode, code, hostId, seed }) {
+  return {
+    v: 1, code: code || "", mode, hostId, status: "lobby",
+    rng: seed | 0, settings: { rounds: 9 },
+    players: [], order: [], turnIdx: 0, round: 1, phase: null,
+    markets: {}, capitals: {}, decks: null, eventDeck: null,
+    cur: null, event: null, revenue: null, last: null,
+    history: [], log: []
+  };
+}
+
+/* ---------- helpers ---------- */
+const getP = (st, id) => st.players.find(p => p.id === id);
+const activeId = st => st.order[st.turnIdx];
+const powerOf = (st, id) => POWERS[getP(st, id).power];
+const label = (st, id) => { const p = getP(st, id); return p ? p.name : "?"; };
+const marketsOf = (st, id) => MARKET_ORDER.filter(m => st.markets[m] === id);
+const has = (st, id, tech) => getP(st, id).techs.includes(tech);
+const homeRegion = (st, id) => MARKETS[powerOf(st, id).home].region;
+function log(st, text) {
+  st.log.push({ r: st.round, text });
+  if (st.log.length > 60) st.log.splice(0, st.log.length - 60);
+}
+
+function claimCost(st, id, mid) {
+  const M = MARKETS[mid], p = getP(st, id);
+  let c = M.cost;
+  if (p.power === "portugal" && M.region !== "americas") c--;
+  if (p.power === "spain" && M.region === "americas") c--;
+  if (has(st, id, "compass") && M.region !== homeRegion(st, id)) c--;
+  if (has(st, id, "caravel") && (M.region === "africa" || M.region === "americas")) c--;
+  return Math.max(1, c);
+}
+function seizeCost(st, id, mid) {
+  const ownerId = st.markets[mid];
+  let c = claimCost(st, id, mid) + 3;
+  if (getP(st, id).power === "dutch") c -= 2;
+  if (ownerId && has(st, ownerId, "carrack")) c += 2;
+  if (ownerId && getP(st, ownerId).power === "asante" && powerOf(st, id).euro) c += 2;
+  return Math.max(2, c);
+}
+function techCost(st, id, tech) { return TECHS[tech].cost; }
+
+function incomeParts(st, id) {
+  const p = getP(st, id), mine = marketsOf(st, id);
+  const parts = [{ label: "Base", n: 2 }];
+  if (mine.length) parts.push({ label: "Markets", n: mine.length });
+  if (has(st, id, "lateen")) parts.push({ label: "Lateen sail", n: 1 });
+  if (has(st, id, "fluyt") && mine.length >= 2) parts.push({ label: "Fluyt", n: Math.floor(mine.length / 2) });
+  if (p.power === "china") {
+    const n = Math.floor(MARKET_ORDER.filter(m => MARKETS[m].good === "silver" && st.markets[m]).length / 2);
+    if (n) parts.push({ label: "Silver magnet", n });
+  }
+  if (p.power === "spain") {
+    const n = mine.filter(m => MARKETS[m].good === "silver").length;
+    if (n) parts.push({ label: "Silver fleets", n });
+  }
+  if (p.power === "asante") {
+    const n = mine.filter(m => MARKETS[m].good === "gold").length;
+    if (n) parts.push({ label: "Gold and guns", n });
+  }
+  return parts;
+}
+
+function score(st, id) {
+  const p = getP(st, id), mine = marketsOf(st, id);
+  const regions = new Set(mine.map(m => MARKETS[m].region));
+  const goods = new Set(mine.map(m => MARKETS[m].good));
+  const nav = NAV_SET.every(t => p.techs.includes(t));
+  const parts = [
+    { key: "markets", label: "Markets held", n: mine.length * 2, note: `${mine.length} × 2` },
+    { key: "regions", label: "Regions beyond the first", n: Math.max(0, regions.size - 1) * 2, note: `${regions.size} region${regions.size === 1 ? "" : "s"}` },
+    { key: "goods", label: "Different goods", n: goods.size, note: `${goods.size} of 6` },
+    { key: "techs", label: "Technologies", n: p.techs.length + (nav ? 2 : 0), note: nav ? `${p.techs.length} + 2 navigation set` : `${p.techs.length}` },
+    { key: "knowledge", label: "Correct answers", n: p.correct, note: `${p.correct} of ${p.answered}` },
+    { key: "bullion", label: "Bullion", n: Math.floor(p.silver / 5), note: `${p.silver} silver ÷ 5` }
+  ];
+  return { total: parts.reduce((s, x) => s + x.n, 0), parts };
+}
+
+function standings(st) {
+  return st.players.map(p => ({ id: p.id, score: score(st, p.id).total, silver: p.silver }))
+    .sort((a, b) => b.score - a.score || b.silver - a.silver);
+}
+
+/* ---------- turn flow ---------- */
+function beginTurn(st) {
+  const id = activeId(st), p = getP(st, id);
+  const parts = incomeParts(st, id);
+  const total = parts.reduce((s, x) => s + x.n, 0);
+  p.silver += total;
+  st.revenue = { id, total, parts };
+  st.phase = "pick";
+  st.cur = null;
+  log(st, `${label(st, id)} collects ${total} silver in revenue.`);
+}
+
+function endTurn(st) {
+  st.turnIdx++;
+  if (st.turnIdx >= st.order.length) {
+    if (st.round >= st.settings.rounds) { finish(st); return; }
+    drawEvent(st);
+    return;
+  }
+  beginTurn(st);
+}
+
+function finish(st) {
+  st.status = "over";
+  st.phase = null;
+  st.cur = null;
+  const s = standings(st);
+  log(st, `Game over. ${label(st, s[0].id)} wins with ${s[0].score} prestige.`);
+}
+
+function drawEvent(st) {
+  const d = st.eventDeck;
+  if (d.i >= d.order.length) { d.order = shuffled(st, EVENT_ORDER); d.i = 0; }
+  const eid = d.order[d.i++];
+  const results = EVENT_FX[eid](st);
+  st.event = { id: eid, round: st.round, results: results.length ? results : ["No one is affected this time."] };
+  st.phase = "event";
+  st.cur = null;
+  log(st, `Event: ${EVENTS[eid].title}.`);
+}
+
+/* ---------- event effects ---------- */
+function evGain(st, id, n, out, why) {
+  if (!id || n <= 0) return;
+  getP(st, id).silver += n;
+  out.push(`${label(st, id)} gains ${n} silver${why ? " (" + why + ")" : ""}.`);
+}
+function evLose(st, id, n, out, why) {
+  if (!id || n <= 0) return;
+  const p = getP(st, id), js = has(st, id, "jointstock");
+  const amt = Math.min(js ? Math.floor(n / 2) : n, p.silver);
+  p.silver -= amt;
+  const notes = [why, js ? "halved by limited liability" : ""].filter(Boolean).join(", ");
+  out.push(`${label(st, id)} loses ${amt} silver${notes ? " (" + notes + ")" : ""}.`);
+}
+function evRelease(st, mid, out, test) {
+  const owner = st.markets[mid];
+  if (!owner || st.capitals[mid] || !test(getP(st, owner))) return;
+  st.markets[mid] = null;
+  out.push(`${label(st, owner)} loses control of ${MARKETS[mid].name}.`);
+}
+const isEuro = p => POWERS[p.power].euro;
+const isIberian = p => p.power === "portugal" || p.power === "spain";
+
+const EVENT_FX = {
+  silverboom(st) { const out = []; MARKET_ORDER.filter(m => MARKETS[m].good === "silver").forEach(m => evGain(st, st.markets[m], 2, out, MARKETS[m].name)); return out; },
+  greatdying(st) { const out = []; st.players.forEach(p => { const n = marketsOf(st, p.id).filter(m => MARKETS[m].region === "americas").length; evLose(st, p.id, n, out); }); return out; },
+  pueblo(st) { const out = []; evRelease(st, "newspain", out, isEuro); return out; },
+  maroons(st) { const out = []; ["caribbean", "brazil"].forEach(m => evLose(st, st.markets[m], 2, out, MARKETS[m].name)); return out; },
+  stono(st) { const out = []; evLose(st, st.markets.carolina, 3, out, "Carolina"); return out; },
+  nzinga(st) { const out = []; evRelease(st, "luanda", out, isIberian); const d = st.players.find(p => p.power === "dutch"); if (d) evGain(st, d.id, 2, out, "alliance with Nzinga"); return out; },
+  tokugawa(st) { const out = []; evRelease(st, "nagasaki", out, isIberian); return out; },
+  mingexpels(st) { const out = []; evRelease(st, "canton", out, isEuro); return out; },
+  voc(st) { const out = []; st.players.forEach(p => { if (p.techs.includes("jointstock")) evGain(st, p.id, 3, out); }); return out; },
+  anglodutch(st) {
+    const out = []; const counts = st.players.map(p => marketsOf(st, p.id).length); const max = Math.max(...counts);
+    st.players.forEach((p, i) => { if (counts[i] === max && max > 0) evLose(st, p.id, 2, out, "war costs"); }); return out;
+  },
+  fronde(st) { const out = []; st.players.forEach(p => { if (p.silver >= 10) evLose(st, p.id, 3, out, "new taxes"); }); return out; },
+  newcrops(st) { const out = []; st.players.forEach(p => evGain(st, p.id, 2, out)); return out; },
+  gujarati(st) { const out = []; MARKET_ORDER.filter(m => MARKETS[m].region === "indian").forEach(m => evGain(st, st.markets[m], 1, out, MARKETS[m].name)); return out; },
+  asanterise(st) { const out = []; MARKET_ORDER.filter(m => MARKETS[m].good === "gold").forEach(m => evGain(st, st.markets[m], 2, out, MARKETS[m].name)); return out; },
+  kongo(st) { const out = []; evGain(st, st.markets.kongo, 3, out, "Mbanza Kongo"); return out; },
+  galleons(st) { const out = []; evGain(st, st.markets.manila, 3, out, "Manila"); evGain(st, st.markets.canton, 2, out, "Canton"); return out; },
+  balance(st) {
+    const out = []; const g = st.players.map(p => new Set(marketsOf(st, p.id).map(m => MARKETS[m].good)).size); const max = Math.max(...g);
+    st.players.forEach((p, i) => { if (g[i] === max && max > 0) evGain(st, p.id, 3, out, `${max} kinds of goods`); }); return out;
+  }
+};
+
+/* ---------- reducer ---------- */
+function reduce(input, action, actor) {
+  const st = JSON.parse(JSON.stringify(input));
+  const local = st.mode === "local";
+  const isHost = local || actor === st.hostId;
+  const me = getP(st, actor);
+  const mustBeActive = () => { if (st.status !== "playing") fail("The game isn’t running."); if (!local && activeId(st) !== actor) fail("It’s not your turn."); };
+  const phase = ph => { if (st.phase !== ph) fail("That move isn’t available right now."); };
+  const A = activeId(st);
+
+  switch (action.type) {
+    /* ----- lobby ----- */
+    case "join": {
+      const name = String(action.name || "").trim().slice(0, 20);
+      if (!name) fail("Enter a nickname first.");
+      if (me) { me.name = name; return st; }
+      if (st.status !== "lobby") fail("That game has already started.");
+      if (st.players.length >= MAX_PLAYERS) fail("That game is full (4 players).");
+      st.players.push({ id: actor, name, power: null, silver: 0, techs: [], correct: 0, answered: 0 });
+      return st;
+    }
+    case "leave": {
+      if (st.status !== "lobby") fail("You can only leave from the lobby.");
+      st.players = st.players.filter(p => p.id !== actor);
+      if (actor === st.hostId && st.players.length) st.hostId = st.players[0].id;
+      return st;
+    }
+    case "pickPower": {
+      if (st.status !== "lobby") fail("Powers are chosen in the lobby.");
+      const target = local && action.player ? getP(st, action.player) : me;
+      if (!target) fail("Join the game first.");
+      if (action.power !== null && !POWERS[action.power]) fail("Unknown power.");
+      if (action.power && st.players.some(p => p.power === action.power && p.id !== target.id)) fail("Someone already chose that power.");
+      target.power = action.power;
+      return st;
+    }
+    case "setRounds": {
+      if (!isHost) fail("Only the host can change the game length.");
+      if (st.status !== "lobby") fail("The game has started.");
+      if (![6, 9, 12].includes(action.rounds)) fail("Choose 6, 9, or 12 rounds.");
+      st.settings.rounds = action.rounds;
+      return st;
+    }
+    case "start": {
+      if (!isHost) fail("Only the host can start the game.");
+      if (st.status !== "lobby") fail("The game has already started.");
+      if (st.players.length < MIN_PLAYERS) fail("You need at least 2 players.");
+      if (st.players.some(p => !p.power)) fail("Every player needs to choose a power.");
+      st.order = shuffled(st, st.players.map(p => p.id));
+      MARKET_ORDER.forEach(m => { st.markets[m] = null; });
+      st.players.forEach(p => {
+        const P = POWERS[p.power];
+        p.silver = P.silver; p.techs = P.startTech.slice(); p.correct = 0; p.answered = 0;
+        st.markets[P.home] = p.id; st.capitals[P.home] = p.id;
+      });
+      st.decks = {};
+      Object.keys(Q_BY_TYPE).forEach(t => { st.decks[t] = { order: shuffled(st, Q_BY_TYPE[t]), i: 0 }; });
+      st.eventDeck = { order: shuffled(st, EVENT_ORDER), i: 0 };
+      st.status = "playing"; st.round = 1; st.turnIdx = 0; st.history = []; st.log = [];
+      log(st, `The year is 1450. Turn order: ${st.order.map(id => label(st, id)).join(", ")}.`);
+      beginTurn(st);
+      return st;
+    }
+
+    /* ----- a turn ----- */
+    case "chooseQ": {
+      mustBeActive(); phase("pick");
+      if (!QTYPES[action.qtype]) fail("Unknown question type.");
+      const d = st.decks[action.qtype];
+      if (d.i >= d.order.length) { d.order = shuffled(st, Q_BY_TYPE[action.qtype]); d.i = 0; }
+      const qid = d.order[d.i++];
+      st.cur = { qtype: action.qtype, qid, perm: shuffled(st, [0, 1, 2, 3]), choice: null, ok: null, reward: 0, key: `${st.round}-${st.turnIdx}-${qid}` };
+      st.phase = "question";
+      return st;
+    }
+    case "answer": {
+      mustBeActive(); phase("question");
+      const c = action.choice | 0;
+      if (c < 0 || c > 3) fail("Pick one of the four answers.");
+      const p = getP(st, A);
+      const ok = st.cur.perm[c] === 0;
+      let reward = 0;
+      if (ok) { reward = QTYPES[st.cur.qtype].reward + (p.techs.includes("astrolabe") ? 1 : 0); p.silver += reward; p.correct++; }
+      p.answered++;
+      st.cur.choice = c; st.cur.ok = ok; st.cur.reward = reward;
+      st.history.push({ id: A, qid: st.cur.qid, ok, choice: st.cur.perm[c] });
+      st.phase = "reveal";
+      log(st, ok ? `${label(st, A)} answers a ${QTYPES[st.cur.qtype].name} question correctly: +${reward} silver.` : `${label(st, A)} misses a ${QTYPES[st.cur.qtype].name} question.`);
+      return st;
+    }
+    case "toAction": {
+      mustBeActive(); phase("reveal");
+      st.phase = "action";
+      return st;
+    }
+    case "claim": {
+      mustBeActive(); phase("action");
+      const mid = action.market, M = MARKETS[mid];
+      if (!M) fail("Unknown market.");
+      if (st.markets[mid]) fail("That market is already held.");
+      const cost = claimCost(st, A, mid), p = getP(st, A);
+      if (p.silver < cost) fail(`You need ${cost} silver to claim ${M.name}.`);
+      p.silver -= cost; st.markets[mid] = A;
+      st.last = { id: A, kind: "claim", market: mid };
+      log(st, `${label(st, A)} claims ${M.name} for ${cost} silver.`);
+      mughalBonus(st, A, mid);
+      endTurn(st);
+      return st;
+    }
+    case "seize": {
+      mustBeActive(); phase("action");
+      const mid = action.market, M = MARKETS[mid];
+      if (!M) fail("Unknown market.");
+      const owner = st.markets[mid];
+      if (!owner) fail("That market is open. Claim it instead.");
+      if (owner === A) fail("You already hold that market.");
+      if (st.capitals[mid]) fail(`${M.name} is a capital and can’t be seized.`);
+      const cost = seizeCost(st, A, mid), p = getP(st, A);
+      if (p.silver < cost) fail(`You need ${cost} silver to seize ${M.name}.`);
+      p.silver -= cost; st.markets[mid] = A;
+      st.last = { id: A, kind: "seize", market: mid, from: owner };
+      log(st, `${label(st, A)} seizes ${M.name} from ${label(st, owner)} for ${cost} silver.`);
+      mughalBonus(st, A, mid);
+      endTurn(st);
+      return st;
+    }
+    case "adopt": {
+      mustBeActive(); phase("action");
+      const T = TECHS[action.tech];
+      if (!T) fail("Unknown technology.");
+      const p = getP(st, A);
+      if (p.techs.includes(action.tech)) fail("You already have that technology.");
+      const cost = techCost(st, A, action.tech);
+      if (p.silver < cost) fail(`You need ${cost} silver to adopt the ${T.name}.`);
+      p.silver -= cost; p.techs.push(action.tech);
+      st.last = { id: A, kind: "adopt", tech: action.tech };
+      log(st, `${label(st, A)} adopts the ${T.name}.`);
+      endTurn(st);
+      return st;
+    }
+    case "hold": {
+      mustBeActive(); phase("action");
+      getP(st, A).silver += 1;
+      st.last = { id: A, kind: "hold" };
+      log(st, `${label(st, A)} holds reserves (+1 silver).`);
+      endTurn(st);
+      return st;
+    }
+    case "skip": {
+      if (!isHost) fail("Only the host can skip a turn.");
+      if (st.status !== "playing" || st.phase === "event") fail("There’s no turn to skip.");
+      log(st, `The host skipped ${label(st, A)}’s turn.`);
+      st.last = { id: A, kind: "skip" };
+      endTurn(st);
+      return st;
+    }
+    case "continue": {
+      if (st.status !== "playing") fail("The game isn’t running.");
+      phase("event");
+      if (!local && !isHost && actor !== st.order[0]) fail("Waiting for the next player to continue.");
+      st.round++; st.turnIdx = 0; st.event = null;
+      log(st, `Round ${st.round} begins.`);
+      beginTurn(st);
+      return st;
+    }
+    case "endGame": {
+      if (!isHost) fail("Only the host can end the game.");
+      if (st.status !== "playing") fail("The game isn’t running.");
+      log(st, "The host ended the game early.");
+      finish(st);
+      return st;
+    }
+    default: fail("Unknown action.");
+  }
+}
+
+function mughalBonus(st, actor, mid) {
+  if (MARKETS[mid].region !== "indian") return;
+  const m = st.players.find(p => p.power === "mughal" && p.id !== actor);
+  if (!m) return;
+  m.silver += 1;
+  log(st, `${m.name} earns 1 silver from Gujarati merchants.`);
+}
+
+/* Actions the active player could take right now (used by the UI and the test bots). */
+function legalMoves(st, id) {
+  const p = getP(st, id), out = [];
+  MARKET_ORDER.forEach(m => {
+    const o = st.markets[m];
+    if (!o) { const c = claimCost(st, id, m); if (p.silver >= c) out.push({ type: "claim", market: m, cost: c }); }
+    else if (o !== id && !st.capitals[m]) { const c = seizeCost(st, id, m); if (p.silver >= c) out.push({ type: "seize", market: m, cost: c }); }
+  });
+  TECH_ORDER.forEach(t => { if (!p.techs.includes(t) && p.silver >= techCost(st, id, t)) out.push({ type: "adopt", tech: t, cost: techCost(st, id, t) }); });
+  out.push({ type: "hold", cost: 0 });
+  return out;
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { reduce, newGame, score, standings, claimCost, seizeCost, legalMoves, incomeParts, GameError, Q_BY_ID, activeId };
+}
+
+/* ============================================================
+   UI + SESSIONS
+   ============================================================ */
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const ONLINE_READY = !!(typeof FIREBASE_CONFIG === "object" && FIREBASE_CONFIG && FIREBASE_CONFIG.databaseURL);
+const LETTERS = ["A", "B", "C", "D"];
+
+const ui = {
+  screen: "home", sel: null, guess: null, modal: null, toast: null, busy: false,
+  local: { count: 3, rounds: 9, players: [{ name: "", power: "portugal" }, { name: "", power: "mughal" }, { name: "", power: "china" }, { name: "", power: "asante" }] },
+  reviewWho: null, wasMyTurn: false
+};
+let S = null;        // current game state
+let net = null;      // { kind: "local" | "online", me, code, dispatch }
+let present = new Set();
+
+/* ---------------- MAP ---------------- */
+const K = 3, LON0 = -110, LAT0 = 58, MAP_W = 255 * K, MAP_H = 96 * K;
+const PX = lon => (lon - LON0) * K, PY = lat => (LAT0 - lat) * K;
+const f1 = n => Math.round(n * 10) / 10;
+function curve(pts, closed) {
+  const n = pts.length; if (n < 2) return "";
+  const g = i => closed ? pts[(i + n) % n] : pts[Math.max(0, Math.min(n - 1, i))];
+  let d = `M${f1(pts[0][0])},${f1(pts[0][1])}`;
+  const segs = closed ? n : n - 1;
+  for (let i = 0; i < segs; i++) {
+    const p0 = g(i - 1), p1 = g(i), p2 = g(i + 1), p3 = g(i + 2);
+    d += `C${f1(p1[0] + (p2[0] - p0[0]) / 6)},${f1(p1[1] + (p2[1] - p0[1]) / 6)} ${f1(p2[0] - (p3[0] - p1[0]) / 6)},${f1(p2[1] - (p3[1] - p1[1]) / 6)} ${f1(p2[0])},${f1(p2[1])}`;
+  }
+  return d + (closed ? "Z" : "");
+}
+const proj = pts => pts.map(([la, lo]) => [PX(lo), PY(la)]);
+
+const GLYPHS = {
+  gold: `<circle r="3.4"/>`,
+  silver: `<path d="M-4.2,1.8 L-2.8,-1.8 L2.8,-1.8 L4.2,1.8 Z"/>`,
+  cash: `<path d="M-3.6,3.2 C-3.6,-1.6 0,-4 3.8,-3.8 C3.8,0.4 1.2,3.4 -3.6,3.2 Z"/>`,
+  spices: `<circle cx="-2.4" cy="1.4" r="1.7"/><circle cx="2.4" cy="1.4" r="1.7"/><circle cx="0" cy="-2.2" r="1.7"/>`,
+  textiles: `<path d="M-4,-1.2 L4,-1.2 M-4,1.6 L4,1.6 M-1.4,-4 L-1.4,4 M1.4,-4 L1.4,4" stroke="currentColor" stroke-width="1.3" fill="none"/>`,
+  raw: `<path d="M0,-4.2 L3.6,0 L0,4.2 L-3.6,0 Z"/>`
+};
+
+function staticMapSVG(withIds) {
+  const land = LAND.map(p => `<path d="${curve(proj(p), true)}"/>`).join("");
+  const lakes = LAKES.map(p => `<path d="${curve(proj(p), true)}"/>`).join("");
+  const roses = [[8, -32], [-12, 80], [24, 150]].map(([la, lo]) => [PX(lo), PY(la)]);
+  let rhumb = "";
+  roses.forEach(([cx, cy]) => {
+    for (let i = 0; i < 16; i++) {
+      const a = i * Math.PI / 8, dx = Math.cos(a) * 1600, dy = Math.sin(a) * 1600;
+      rhumb += `<line x1="${f1(cx - dx)}" y1="${f1(cy - dy)}" x2="${f1(cx + dx)}" y2="${f1(cy + dy)}" class="${i % 2 ? "rh2" : "rh1"}"/>`;
+    }
+  });
+  const rosesG = roses.slice(0, 2).map(([cx, cy]) => {
+    const pts = [];
+    for (let i = 0; i < 16; i++) { const a = i * Math.PI / 8 - Math.PI / 2, r = i % 4 === 0 ? 15 : i % 2 === 0 ? 8 : 4.5; pts.push(`${f1(cx + Math.cos(a) * r)},${f1(cy + Math.sin(a) * r)}`); }
+    return `<g class="rose"><circle cx="${f1(cx)}" cy="${f1(cy)}" r="10.5"/><polygon points="${pts.join(" ")}"/></g>`;
+  }).join("");
+  const routes = ROUTES.map(r => {
+    const d = curve(proj(r.pts), false);
+    let lab = "";
+    if (r.name && r.label) lab = `<text class="routeLab ${r.kind}" x="${f1(PX(r.label[1]))}" y="${f1(PY(r.label[0]))}" text-anchor="middle">${esc(r.name)}</text>`;
+    return `<path class="route ${r.kind}" d="${d}"/>${lab}`;
+  }).join("");
+  const oceans = OCEANS.map(o => `<text class="ocean${o.small ? " small" : ""}" x="${f1(PX(o.lon))}" y="${f1(PY(o.lat))}" text-anchor="middle">${esc(o.name)}</text>`).join("");
+  const cities = CITIES.map(c => {
+    const x = PX(c.lon), y = PY(c.lat);
+    return `<rect class="city" x="${f1(x - 1.8)}" y="${f1(y - 1.8)}" width="3.6" height="3.6"/><text class="cityLab" x="${f1(x + c.dx)}" y="${f1(y + 3 + (c.dy || 0))}" text-anchor="${c.anchor}">${esc(c.name)}</text>`;
+  }).join("");
+  const mLabels = MARKET_ORDER.map(id => {
+    const M = MARKETS[id], x = PX(M.lon), y = PY(M.lat);
+    const o = { r: [13, 3.6, "start"], l: [-13, 3.6, "end"], t: [0, -14, "middle"], b: [0, 21, "middle"] }[M.lab];
+    return `<text class="mLab" x="${f1(x + o[0])}" y="${f1(y + o[1])}" text-anchor="${o[2]}">${esc(M.name)}</text>`;
+  }).join("");
+  const symbols = Object.keys(GLYPHS).map(g => `<symbol id="g-${g}" viewBox="-5 -5 10 10" overflow="visible">${GLYPHS[g]}</symbol>`).join("");
+  return `<svg class="map" viewBox="0 0 ${MAP_W} ${MAP_H}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map of the world’s oceans, 1450 to 1750, showing trade markets">
+  <defs>
+    <clipPath id="mapClip${withIds ? "" : "S"}"><rect width="${MAP_W}" height="${MAP_H}"/></clipPath>
+    <pattern id="landDots${withIds ? "" : "S"}" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#E4D9BF"/><circle cx="1.5" cy="1.5" r=".6" fill="#CDBE97"/><circle cx="4.5" cy="4.5" r=".6" fill="#CDBE97"/></pattern>
+    ${withIds ? symbols : ""}
+  </defs>
+  <g clip-path="url(#mapClip${withIds ? "" : "S"})">
+    <rect class="sea" width="${MAP_W}" height="${MAP_H}"/>
+    <g class="rhumb">${rhumb}</g>
+    ${rosesG}
+    <g class="land" fill="url(#landDots${withIds ? "" : "S"})">${land}</g>
+    <g class="lakes">${lakes}</g>
+    ${oceans}
+    <g class="routes">${routes}</g>
+    ${cities}
+    ${withIds ? `<g class="mLabels">${mLabels}</g><g id="markers"></g>` : ""}
+  </g>
+  <rect class="frame" x=".5" y=".5" width="${MAP_W - 1}" height="${MAP_H - 1}"/>
+</svg>`;
+}
+
+let mapEl = null;
+function getMapEl() {
+  if (!mapEl) {
+    mapEl = document.createElement("div");
+    mapEl.className = "mapScroll";
+    mapEl.innerHTML = staticMapSVG(true);
+    mapEl.addEventListener("click", e => {
+      const g = e.target.closest("[data-m]");
+      if (g) { ui.sel = g.getAttribute("data-m"); ui.scrollToSel = true; render(); }
+    });
+    mapEl.addEventListener("keydown", e => {
+      const g = e.target.closest("[data-m]");
+      if (g && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); ui.sel = g.getAttribute("data-m"); render(); focusLater(`[data-m="${ui.sel}"]`); }
+    });
+  }
+  return mapEl;
+}
+function drawMarkers() {
+  const layer = getMapEl().querySelector("#markers");
+  if (!layer || !S || !S.markets) return;
+  const A = S.status === "playing" ? activeId(S) : null;
+  const canAct = S.status === "playing" && S.phase === "action" && isMine();
+  const p = A ? getP(S, A) : null;
+  layer.innerHTML = MARKET_ORDER.map(id => {
+    const M = MARKETS[id], x = f1(PX(M.lon)), y = f1(PY(M.lat));
+    const owner = S.markets[id], op = owner ? getP(S, owner) : null, col = op ? POWERS[op.power].color : null;
+    let target = false;
+    if (canAct && p) {
+      if (!owner) target = p.silver >= claimCost(S, A, id);
+      else if (owner !== A && !S.capitals[id]) target = p.silver >= seizeCost(S, A, id);
+    }
+    const lab = `${M.name}, ${M.product}. ${op ? "Held by " + op.name + ", " + POWERS[op.power].name : "Open"}${S.capitals[id] ? ", capital" : ""}.`;
+    return `<g class="mk${owner ? " owned" : ""}${target ? " target" : ""}${ui.sel === id ? " sel" : ""}" transform="translate(${x},${y})" data-m="${id}" tabindex="0" role="button" aria-label="${esc(lab)}">
+      <title>${esc(M.name)}</title>
+      <circle class="hit" r="15"/>
+      ${target ? `<circle class="tRing" r="14"/>` : ""}
+      ${ui.sel === id ? `<circle class="sRing" r="15.5"/>` : ""}
+      ${S.capitals[id] ? `<circle class="cap" r="12.4" style="stroke:${col}"/>` : ""}
+      <circle class="dot" r="9" ${col ? `style="fill:${col}"` : ""}/>
+      ${op ? `<text class="ini" y="3.6" text-anchor="middle">${POWERS[op.power].short}</text>` : `<use href="#g-${M.good}" x="-5" y="-5" width="10" height="10" class="gly"/>`}
+    </g>`;
+  }).join("");
+}
+
+/* ---------------- helpers ---------------- */
+function isMine() {
+  if (!S || S.status !== "playing") return false;
+  return net && (net.kind === "local" || activeId(S) === net.me);
+}
+const pColor = p => POWERS[p.power] ? POWERS[p.power].color : "#888";
+function chip(p, size) {
+  if (!p || !p.power) return `<span class="chip blank${size ? " " + size : ""}" aria-hidden="true"></span>`;
+  return `<span class="chip${size ? " " + size : ""}" style="--c:${pColor(p)}" aria-hidden="true">${POWERS[p.power].short}</span>`;
+}
+function who(p) { return p ? `${esc(p.name)}${p.power ? `, ${esc(POWERS[p.power].name)}` : ""}` : ""; }
+function silverTxt(n) { return `${n} silver`; }
+function toast(msg) {
+  ui.toast = msg; renderToast();
+  clearTimeout(toast.t); toast.t = setTimeout(() => { ui.toast = null; renderToast(); }, 4200);
+}
+function renderToast() {
+  let el = $("#toast");
+  if (!el) { el = document.createElement("div"); el.id = "toast"; el.setAttribute("role", "status"); el.setAttribute("aria-live", "polite"); document.body.appendChild(el); }
+  el.textContent = ui.toast || "";
+  el.className = ui.toast ? "show" : "";
+}
+function focusLater(sel) { setTimeout(() => { const el = $(sel); if (el) el.focus(); }, 0); }
+async function act(action) {
+  if (ui.busy) return;
+  ui.busy = true;
+  try { await net.dispatch(action); }
+  catch (e) { toast(friendlyError(e)); }
+  finally { ui.busy = false; render(); }
+}
+function friendlyError(e) {
+  const code = (e && (e.code || e.message || "")) + "";
+  if (/operation-not-allowed|admin-restricted/.test(code)) return "Anonymous sign-in is turned off in Firebase. Turn it on under Authentication, Sign-in method.";
+  if (/PERMISSION_DENIED|permission_denied/i.test(code)) return "The database rules are blocking access. Publish the rules from the setup guide.";
+  if (/network|Could not load|unavailable/i.test(code)) return "Couldn’t reach Firebase. Check the internet connection and try again.";
+  return (e && e.message) || "Something went wrong. Try again.";
+}
+
+/* ---------------- LOCAL SESSION ---------------- */
+function startLocalSession(state) {
+  S = state;
+  net = { kind: "local", me: null, code: null, dispatch: async a => { S = reduce(S, a, "local"); saveLocal(); } };
+  ui.sel = null; ui.reviewWho = null;
+  saveLocal(); route(); render();
+}
+function saveLocal() { if (S && S.mode === "local") store.set("tw.local", JSON.stringify(S)); }
+function savedLocal() { try { const s = JSON.parse(store.get("tw.local") || "null"); return s && s.status === "playing" ? s : null; } catch (e) { return null; } }
+
+/* ---------------- ONLINE SESSION (Firebase) ---------------- */
+const FB = { db: null, uid: null, ref: null, presRef: null, presAll: null, conn: null };
+function loadScript(src) {
+  return new Promise((res, rej) => { const s = document.createElement("script"); s.src = src; s.onload = res; s.onerror = () => rej(new Error("Could not load " + src)); document.head.appendChild(s); });
+}
+async function fbReady() {
+  if (FB.uid) return FB.uid;
+  if (!window.firebase) {
+    for (const m of ["app", "auth", "database"]) await loadScript(`https://www.gstatic.com/firebasejs/10.12.2/firebase-${m}-compat.js`);
+  }
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  FB.db = firebase.database();
+  const cred = await firebase.auth().signInAnonymously();
+  FB.uid = cred.user.uid;
+  return FB.uid;
+}
+const pack = (st, v) => ({ s: JSON.stringify(st), v, t: firebase.database.ServerValue.TIMESTAMP });
+function genCode() { const L = "ABCDEFGHJKMNPQRSTUVWXYZ"; let c = ""; for (let i = 0; i < 4; i++) c += L[Math.floor(Math.random() * L.length)]; return c; }
+
+async function createOnline(name) {
+  const uid = await fbReady();
+  for (let i = 0; i < 6; i++) {
+    const code = genCode();
+    let st = newGame({ mode: "online", code, hostId: uid, seed: (Math.random() * 2147483647) | 0 });
+    st = reduce(st, { type: "join", name }, uid);
+    const res = await FB.db.ref("games/" + code).transaction(cur => cur === null ? pack(st, 1) : undefined);
+    if (res.committed) { await connect(code); return; }
+  }
+  throw new Error("Couldn’t open a new room. Try again.");
+}
+async function joinOnline(code, name) {
+  const uid = await fbReady();
+  const snap = await FB.db.ref("games/" + code).once("value");
+  if (!snap.exists()) throw new Error(`There’s no game with the code ${code}. Check the code with your host.`);
+  FB.ref = FB.db.ref("games/" + code);
+  net = { kind: "online", me: uid, code, dispatch: onlineDispatch };
+  await onlineDispatch({ type: "join", name });
+  await connect(code);
+}
+async function onlineDispatch(action) {
+  let err = null;
+  const res = await FB.ref.transaction(cur => {
+    if (cur === null) return null;
+    try { err = null; return pack(reduce(JSON.parse(cur.s), action, FB.uid), (cur.v || 0) + 1); }
+    catch (e) { err = e; return; }
+  });
+  if (err) throw err;
+  if (!res.committed) throw new Error("That move didn’t go through. Try again.");
+  if (res.snapshot.val() === null) throw new Error("That game no longer exists.");
+}
+async function connect(code) {
+  disconnect(false);
+  FB.ref = FB.db.ref("games/" + code);
+  net = { kind: "online", me: FB.uid, code, dispatch: onlineDispatch };
+  store.set("tw.lastCode", code);
+  FB.ref.on("value", snap => {
+    const v = snap.val();
+    if (!v) { disconnect(true); S = null; ui.screen = "home"; render(); toast("That game was closed."); return; }
+    try { S = JSON.parse(v.s); } catch (e) { return; }
+    route(); render();
+  }, err => toast(friendlyError(err)));
+  FB.presRef = FB.db.ref(`presence/${code}/${FB.uid}`);
+  FB.conn = FB.db.ref(".info/connected");
+  FB.conn.on("value", s => { if (s.val() === true) { FB.presRef.onDisconnect().remove(); FB.presRef.set(true); } });
+  FB.presAll = FB.db.ref(`presence/${code}`);
+  FB.presAll.on("value", s => { present = new Set(Object.keys(s.val() || {})); if (ui.screen !== "home") render(); });
+}
+function disconnect(forget) {
+  if (FB.ref) FB.ref.off();
+  if (FB.presAll) FB.presAll.off();
+  if (FB.conn) FB.conn.off();
+  if (FB.presRef) { FB.presRef.onDisconnect().cancel(); FB.presRef.remove(); }
+  FB.ref = FB.presAll = FB.conn = FB.presRef = null;
+  present = new Set();
+  if (forget) store.del("tw.lastCode");
+}
+
+/* ---------------- ROUTING ---------------- */
+function route() {
+  const prev = ui.screen;
+  if (!S) { ui.screen = "home"; return; }
+  ui.screen = S.status === "lobby" ? (S.mode === "local" ? "home" : "lobby") : S.status === "playing" ? "game" : "over";
+  if (prev !== ui.screen && ui.toast) { ui.toast = null; renderToast(); }
+  if (S.status === "playing" && net && net.kind === "online") {
+    const mine = activeId(S) === net.me && S.phase !== "event";
+    document.title = mine ? "Your turn: Trade Winds" : "Trade Winds";
+    ui.wasMyTurn = mine;
+  }
+}
+function goHome() {
+  if (net && net.kind === "online") disconnect(true);
+  if (S && S.mode === "local" && S.status === "over") store.del("tw.local");
+  S = null; net = null; ui.sel = null; ui.modal = null; ui.screen = "home"; document.title = "Trade Winds";
+  render();
+}
+
+/* ---------------- RENDER ---------------- */
+function render() {
+  if (S) route();
+  const app = $("#app");
+  const scrollY = window.scrollY;
+  let html = "";
+  if (ui.screen === "home") html = homeView();
+  else if (ui.screen === "localSetup") html = localSetupView();
+  else if (ui.screen === "lobby") html = lobbyView();
+  else if (ui.screen === "game") html = gameView();
+  else if (ui.screen === "over") html = overView();
+  app.innerHTML = html;
+  const slot = $("#mapSlot");
+  if (slot) { slot.appendChild(getMapEl()); drawMarkers(); }
+  renderModal();
+  window.scrollTo(0, scrollY);
+  if (ui.scrollToSel) { ui.scrollToSel = false; const mp = $(".mPanel"); if (mp) mp.scrollIntoView({ block: "nearest" }); }
+}
+
+function topBar(extra) {
+  const round = S && S.status === "playing" ? `<span class="round">Round ${S.round} of ${S.settings.rounds}</span>` : "";
+  const room = net && net.kind === "online" ? `<span class="room">Room <b>${esc(net.code)}</b></span>` : "";
+  return `<header class="bar">
+    <span class="wordmark">Trade Winds</span>
+    ${round}${room}
+    <span class="barBtns">${extra || ""}<button class="btn ghost sm" data-a="rules">Rules</button><button class="btn ghost sm" data-a="menu">Menu</button></span>
+  </header>`;
+}
+
+/* ---- Home ---- */
+function homeView() {
+  const nick = store.get("tw.nick") || "";
+  const last = store.get("tw.lastCode");
+  const saved = savedLocal();
+  return `<div class="home">
+    <div class="homeMap" aria-hidden="true">${staticMapSVG(false)}</div>
+    <main class="homeCard">
+      <h1 class="title">Trade Winds</h1>
+      <p class="sub">A board game for AP World History, Unit 4: Transoceanic Interconnections, 1450–1750</p>
+      <p class="lede">Lead a European, Asian, or African power from 1450 to 1750. Answer questions to earn silver, then spend it on markets, ships, and ideas. The most balanced trading empire wins.</p>
+      <div class="homeGroup">
+        <h2>Play online</h2>
+        ${ONLINE_READY ? `
+        <label class="field"><span>Your nickname</span><input id="nick" maxlength="20" autocomplete="off" value="${esc(nick)}" placeholder="For example, Ana R."></label>
+        <p class="hint">Use a nickname, not your full name. Players in your game will see it.</p>
+        <div class="homeActions">
+          <button class="btn" data-a="create">Create a game</button>
+          <span class="or">or</span>
+          <span class="joinRow"><input id="code" maxlength="4" autocomplete="off" placeholder="Room code" aria-label="Room code"><button class="btn ghost" data-a="join">Join</button></span>
+        </div>
+        ${last ? `<button class="btn link" data-a="rejoin">Rejoin room ${esc(last)}</button>` : ""}
+        ` : `<p class="note">Online play turns on once a Firebase project is connected to this file. Until then, play on one screen below.</p>`}
+      </div>
+      <div class="homeGroup">
+        <h2>Play on one screen</h2>
+        <p class="hint">Pass one device around, or put it on a projector for the whole class.</p>
+        <div class="homeActions">
+          <button class="btn ${ONLINE_READY ? "ghost" : ""}" data-a="localSetup">Set up a game</button>
+          ${saved ? `<button class="btn ghost" data-a="resumeLocal">Resume the game on this device</button>` : ""}
+          <button class="btn link" data-a="rules">How to play</button>
+        </div>
+      </div>
+    </main>
+  </div>`;
+}
+
+/* ---- Local setup ---- */
+function localSetupView() {
+  const L = ui.local, n = L.count;
+  const rows = L.players.slice(0, n).map((p, i) => {
+    const taken = L.players.slice(0, n).filter((q, j) => j !== i).map(q => q.power);
+    const opts = POWER_ORDER.map(k => `<option value="${k}" ${p.power === k ? "selected" : ""} ${taken.includes(k) ? "disabled" : ""}>${esc(POWERS[k].name)}</option>`).join("");
+    return `<div class="setupRow">
+      <span class="chip" style="--c:${POWERS[p.power].color}" aria-hidden="true">${POWERS[p.power].short}</span>
+      <label class="field grow"><span>Player ${i + 1}</span><input data-lp="${i}" maxlength="20" value="${esc(p.name)}" placeholder="Nickname"></label>
+      <label class="field"><span>Power</span><select data-lpow="${i}">${opts}</select></label>
+    </div>`;
+  }).join("");
+  return `${topBarSimple()}
+  <main class="page narrow">
+    <h1 class="pageTitle">Play on one screen</h1>
+    <p class="hint">Everyone shares this device. Each player chooses a different power.</p>
+    <fieldset class="seg"><legend>Players</legend>
+      ${[2, 3, 4].map(k => `<button class="segBtn${n === k ? " on" : ""}" data-a="lcount" data-n="${k}" aria-pressed="${n === k}">${k}</button>`).join("")}
+    </fieldset>
+    <div class="setupRows">${rows}</div>
+    ${lengthPicker(L.rounds, "lrounds")}
+    <details class="powersRef"><summary>What each power does</summary>${powerRef()}</details>
+    <div class="actions"><button class="btn" data-a="localStart">Start the game</button><button class="btn ghost" data-a="home">Back</button></div>
+  </main>`;
+}
+function topBarSimple() { return `<header class="bar"><button class="wordmark asLink" data-a="home">Trade Winds</button><span class="barBtns"><button class="btn ghost sm" data-a="rules">Rules</button></span></header>`; }
+function lengthPicker(cur, action) {
+  const opts = [[6, "Short", "6 rounds"], [9, "Standard", "9 rounds"], [12, "Long", "12 rounds"]];
+  return `<fieldset class="seg"><legend>Game length</legend>
+    ${opts.map(([r, a, b]) => `<button class="segBtn${cur === r ? " on" : ""}" data-a="${action}" data-n="${r}" aria-pressed="${cur === r}">${a}<small>${b}</small></button>`).join("")}
+  </fieldset>`;
+}
+function powerRef() {
+  return `<div class="powerRef">${POWER_ORDER.map(k => { const P = POWERS[k]; return `<div><b><span class="chip sm" style="--c:${P.color}">${P.short}</span>${esc(P.name)}</b><p>${esc(P.abilityText)} Starts with ${esc(MARKETS[P.home].name)}${P.startTech.length ? ", the " + esc(TECHS[P.startTech[0]].name) : ""}, and ${P.silver} silver.</p></div>`; }).join("")}</div>`;
+}
+
+/* ---- Online lobby ---- */
+function lobbyView() {
+  const me = getP(S, net.me), isHost = S.hostId === net.me;
+  const players = S.players.map(p => `<li>${chip(p)}<span class="pname">${esc(p.name)}${p.id === net.me ? " (you)" : ""}${p.id === S.hostId ? " <em>host</em>" : ""}</span><span class="pstat">${p.power ? esc(POWERS[p.power].name) : "Choosing a power"}</span>${present.has(p.id) ? "" : `<span class="away">away</span>`}</li>`).join("");
+  const tiles = POWER_ORDER.map(k => {
+    const P = POWERS[k], takenBy = S.players.find(p => p.power === k), mine = me && me.power === k;
+    const dis = takenBy && !mine;
+    return `<button class="powerTile${mine ? " on" : ""}" data-a="pick" data-p="${k}" ${dis ? "disabled" : ""} aria-pressed="${mine}" style="--c:${P.color}">
+      <span class="ptHead"><span class="chip" style="--c:${P.color}">${P.short}</span><b>${esc(P.name)}</b>${dis ? `<span class="taken">${esc(takenBy.name)}</span>` : ""}</span>
+      <span class="ptAbility">${esc(P.ability)}</span>
+      <span class="ptText">${esc(P.abilityText)}</span>
+      <span class="ptStart">Starts with ${esc(MARKETS[P.home].name)}${P.startTech.length ? ", the " + esc(TECHS[P.startTech[0]].name) : ""}, and ${P.silver} silver.</span>
+    </button>`;
+  }).join("");
+  const ready = S.players.length >= 2 && S.players.every(p => p.power);
+  const why = S.players.length < 2 ? "Waiting for at least one more player to join." : !ready ? "Waiting for everyone to choose a power." : "";
+  return `${topBar()}
+  <main class="page">
+    <section class="lobbyTop">
+      <div class="roomBig"><span>Room code</span><b>${esc(S.code)}</b><button class="btn ghost sm" data-a="copyCode">Copy code</button></div>
+      <div><h2>Players (${S.players.length} of 4)</h2><ul class="plist">${players}</ul></div>
+    </section>
+    <h2>Choose your power</h2>
+    <div class="powerGrid">${tiles}</div>
+    ${isHost ? `${lengthPicker(S.settings.rounds, "rounds")}
+      <div class="actions"><button class="btn" data-a="start" ${ready ? "" : "disabled"}>Start the game</button>${why ? `<span class="hint">${why}</span>` : ""}</div>`
+      : `<p class="hint waiting">Waiting for ${esc((getP(S, S.hostId) || {}).name || "the host")} to start a ${S.settings.rounds}-round game.</p>`}
+  </main>`;
+}
+
+/* ---- Game ---- */
+function gameView() {
+  return `${topBar()}
+  <div class="board">
+    <section class="boardMain">
+      <div id="mapSlot" class="mapFrame"></div>
+      <p class="mapHint">Swipe the map sideways to see all four regions.</p>
+      ${legend()}
+      <div class="ledgers">${ledgers()}</div>
+      ${logView()}
+    </section>
+    <aside class="rail">
+      ${ui.sel ? marketPanel(ui.sel) : ""}
+      <div class="turn" aria-live="polite">${turnPanel()}</div>
+    </aside>
+  </div>`;
+}
+function legend() {
+  return `<div class="legend">${Object.keys(GOODS).map(g => `<span><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><circle r="6.5" class="lgDot"/><use href="#g-${g}" x="-5" y="-5" width="10" height="10" class="gly"/></svg>${esc(GOODS[g].name)}</span>`).join("")}
+    <span><svg width="14" height="14" viewBox="-7 -7 14 14" aria-hidden="true"><circle r="5" class="lgDot"/><circle r="6.3" fill="none" stroke="#E4D9BF" stroke-width="1.1"/></svg>Capital, can’t be seized</span>
+    <span><svg width="22" height="8" aria-hidden="true"><path d="M1,4 H21" stroke="#E08B7A" stroke-width="1.6" stroke-dasharray="1.6 3"/></svg>Forced migration</span></div>`;
+}
+function ledgers() {
+  const A = activeId(S);
+  return S.order.map(id => {
+    const p = getP(S, id), sc = score(S, id), n = MARKET_ORDER.filter(m => S.markets[m] === id).length;
+    const away = net.kind === "online" && !present.has(id);
+    const canSkip = net.kind === "online" && S.hostId === net.me && id === A && id !== net.me && S.phase !== "event";
+    return `<div class="ledger${id === A && S.phase !== "event" ? " now" : ""}" style="--c:${pColor(p)}">
+      <div class="lgTop">${chip(p)}<span class="lgName"><b>${esc(p.name)}</b><span>${p.name !== POWERS[p.power].name ? esc(POWERS[p.power].name) : ""}${net.kind === "online" && id === net.me ? (p.name !== POWERS[p.power].name ? ", you" : "You") : ""}</span></span><span class="prest" title="Prestige"><b>${sc.total}</b><span>prestige</span></span></div>
+      <div class="lgStats"><span><b>${p.silver}</b> silver</span><span><b>${n}</b> market${n === 1 ? "" : "s"}</span><span><b>${p.correct}</b>/${p.answered} correct</span></div>
+      <div class="lgTech">${p.techs.length ? p.techs.map(t => `<span>${esc(TECHS[t].name)}</span>`).join("") : `<span class="none">No technologies yet</span>`}</div>
+      ${away ? `<div class="lgAway">Away${canSkip ? ` <button class="btn link sm" data-a="skip">Skip this turn</button>` : ""}</div>` : ""}
+    </div>`;
+  }).join("");
+}
+function logView() {
+  const items = S.log.slice(-8).reverse().map(l => `<li><span class="lr">R${l.r}</span>${esc(l.text)}</li>`).join("");
+  return `<details class="log"><summary>Recent moves</summary><ul>${items}</ul></details>`;
+}
+
+function turnPanel() {
+  if (S.phase === "event") return eventCard();
+  const A = activeId(S), p = getP(S, A), mine = isMine();
+  const head = (title) => `<div class="tHead" style="--c:${pColor(p)}">${chip(p, "lg")}<div><h2>${title}</h2>${p.name !== POWERS[p.power].name ? `<p>${esc(POWERS[p.power].name)}</p>` : ""}</div></div>`;
+  const whoseTurn = net.kind === "local" ? `${esc(p.name)}’s turn` : mine ? "Your turn" : `${esc(p.name)}’s turn`;
+  let body = "";
+  if (S.phase === "pick") {
+    const rv = S.revenue && S.revenue.id === A ? S.revenue : null;
+    const revLine = rv ? `<p class="revenue">Revenue: <b>+${rv.total} silver</b> (${rv.parts.map(x => `${esc(x.label.toLowerCase())} ${x.n}`).join(", ")}). Now ${p.silver} silver.</p>` : "";
+    const lastLine = lastMoveLine();
+    if (mine) {
+      const astro = p.techs.includes("astrolabe");
+      body = `${lastLine}${revLine}<h3 class="step">Choose a question</h3>
+        <div class="qPick">${Object.keys(QTYPES).map(t => `<button class="qBtn" data-a="chooseQ" data-t="${t}"><span class="qName">${QTYPES[t].name}</span><span class="qDesc">${QTYPES[t].desc}</span><span class="qPay">${QTYPES[t].reward + (astro ? 1 : 0)} silver</span></button>`).join("")}</div>
+        <p class="hint">A correct answer also adds 1 prestige.${astro ? " Your astrolabe adds 1 silver." : ""}</p>`;
+    } else {
+      body = `${lastLine}${revLine}<p class="waiting">Waiting for ${esc(p.name)} to choose a question.</p>`;
+    }
+  } else if (S.phase === "question" || S.phase === "reveal") {
+    body = questionCard(mine, p);
+  } else if (S.phase === "action") {
+    body = mine ? actionPanel(p) : `<p class="waiting">${esc(p.name)} is choosing a move.</p>${S.cur ? `<p class="hint">${S.cur.ok ? `${esc(p.name)} answered correctly and earned ${S.cur.reward} silver.` : `${esc(p.name)} missed the question.`}</p>` : ""}`;
+  }
+  return head(whoseTurn) + body;
+}
+function lastMoveLine() {
+  const L = S.last; if (!L) return "";
+  const p = getP(S, L.id); if (!p) return "";
+  let t = "";
+  if (L.kind === "claim") t = `claimed ${MARKETS[L.market].name}`;
+  else if (L.kind === "seize") t = `seized ${MARKETS[L.market].name} from ${esc((getP(S, L.from) || {}).name || "a rival")}`;
+  else if (L.kind === "adopt") t = `adopted the ${TECHS[L.tech].name}`;
+  else if (L.kind === "hold") t = "held reserves";
+  else if (L.kind === "skip") t = "had a turn skipped";
+  return `<p class="lastMove">${chip(p, "sm")}Last turn, ${esc(p.name)} ${t}.</p>`;
+}
+
+function questionCard(mine, p) {
+  const c = S.cur, q = Q_BY_ID[c.qid], reveal = S.phase === "reveal";
+  const correctIdx = c.perm.indexOf(0);
+  const g = ui.guess && ui.guess.key === c.key ? ui.guess.choice : null;
+  const canGuess = !mine && net.kind === "online" && !reveal;
+  const opts = c.perm.map((orig, i) => {
+    const txt = q.o[orig];
+    let cls = "opt";
+    if (reveal) { if (i === correctIdx) cls += " right"; else if (i === c.choice) cls += " wrong"; }
+    else if (canGuess && g === i) cls += " guessed";
+    const action = mine && !reveal ? `data-a="answer" data-c="${i}"` : canGuess ? `data-a="guess" data-c="${i}"` : "";
+    const dis = !action ? "disabled" : "";
+    const mark = reveal && i === correctIdx ? `<span class="mark">Correct answer</span>` : reveal && i === c.choice ? `<span class="mark">${net.kind === "local" || mine ? "Your answer" : esc(p.name) + "’s answer"}</span>` : "";
+    return `<li><button class="${cls}" ${action} ${dis}><span class="let">${LETTERS[i]}</span><span class="otx">${esc(txt)}</span>${mark}</button></li>`;
+  }).join("");
+  let result = "";
+  if (reveal) {
+    const name = net.kind === "local" || mine ? "" : esc(p.name) + " ";
+    result = `<div class="result ${c.ok ? "ok" : "no"}">
+      <p class="verdict">${c.ok ? `${name ? name + "is correct" : "Correct"}. +${c.reward} silver and 1 prestige.` : `${name ? name + "missed this one" : "Not quite"}.`}</p>
+      ${c.ok ? "" : `<p class="ansLine">The answer is <b>${LETTERS[correctIdx]}. ${esc(q.o[0])}</b></p>`}
+      ${g !== null && !mine && net.kind === "online" ? `<p class="guessNote">Your guess, ${LETTERS[g]}, was ${g === correctIdx ? "right" : "not right"}.</p>` : ""}
+      <p class="why">${esc(q.why)}</p>
+    </div>`;
+  }
+  const footer = reveal
+    ? (mine ? `<button class="btn ink" data-a="toAction">Make your move</button>` : `<p class="waiting">Waiting for ${esc(p.name)} to continue.</p>`)
+    : (mine ? "" : canGuess ? `<p class="hint ink">Guess along. Only ${esc(p.name)}’s answer counts.</p>` : `<p class="waiting">Waiting for ${esc(p.name)} to answer.</p>`);
+  return `<article class="card qCard${reveal ? " revealed" : ""}">
+    <div class="qMeta"><span>${QTYPES[c.qtype].name} question, worth ${QTYPES[c.qtype].reward} silver</span><span>${esc(TOPICS[q.topic])}</span></div>
+    ${reveal ? result + footer : ""}
+    ${q.s ? `<figure class="stim"><figcaption>Practice source, written for this game from the historical record</figcaption><p>${esc(q.s)}</p></figure>` : ""}
+    <p class="qText">${esc(q.q)}</p>
+    <ol class="opts">${opts}</ol>
+    ${reveal ? "" : footer}
+  </article>`;
+}
+
+function actionPanel(p) {
+  const A = p.id;
+  const verdict = S.cur ? `<p class="hint">${S.cur.ok ? `Correct: +${S.cur.reward} silver.` : "No silver from the question this time."} You have <b>${p.silver} silver</b>.</p>` : "";
+  const claims = {}, seizes = [];
+  MARKET_ORDER.forEach(m => {
+    const o = S.markets[m];
+    if (!o) { const c = claimCost(S, A, m); if (p.silver >= c) (claims[MARKETS[m].region] = claims[MARKETS[m].region] || []).push([m, c]); }
+    else if (o !== A && !S.capitals[m]) { const c = seizeCost(S, A, m); if (p.silver >= c) seizes.push([m, c, o]); }
+  });
+  const gly = M => `<span class="mGly"><svg width="18" height="18" viewBox="-9 -9 18 18" aria-hidden="true"><circle r="8.5" class="lgDot"/><use href="#g-${M.good}" x="-5" y="-5" width="10" height="10" class="gly"/></svg></span>`;
+  const claimRows = Object.keys(REGIONS).filter(r => claims[r]).map(r =>
+    `<li class="rg">${esc(REGIONS[r].name)}</li>` + claims[r].map(([m, c]) => { const M = MARKETS[m];
+      return `<li><button class="mRow" data-a="claim" data-m="${m}" aria-label="Claim ${esc(M.name)} for ${c} silver">${gly(M)}<span class="mName"><b>${esc(M.name)}</b><span>${esc(M.product)}</span></span><span class="mCost"><b>${c}</b></span></button></li>`; }).join("")
+  ).join("");
+  const seizeRows = seizes.map(([m, c, o]) => { const M = MARKETS[m];
+    return `<li><button class="mRow" data-a="seize" data-m="${m}" aria-label="Seize ${esc(M.name)} from ${esc(getP(S, o).name)} for ${c} silver">${gly(M)}<span class="mName"><b>${esc(M.name)}</b><span>${esc(M.product)}, held by ${esc(getP(S, o).name)}</span></span><span class="mCost"><b>${c}</b></span></button></li>`; }).join("");
+  const techs = TECH_ORDER.filter(t => !p.techs.includes(t)).map(t => {
+    const T = TECHS[t], c = techCost(S, A, t), ok = p.silver >= c;
+    const navNote = NAV_SET.includes(t) ? " Part of the navigation set." : "";
+    return `<li><button class="tRow" data-a="adopt" data-t="${t}" ${ok ? "" : "disabled"} aria-label="Adopt the ${esc(T.name)} for ${c} silver">
+      <span class="mName"><b>${esc(T.name)}</b><span>${esc(T.text)}${navNote}</span><span class="origin">${esc(T.origin)}</span></span>
+      <span class="mCost"><b>${c}</b></span></button></li>`;
+  }).join("");
+  return `${verdict}
+    <h3 class="step">Make one move</h3>
+    <p class="hint">Dashed rings on the map mark markets you can afford. Numbers are costs in silver.</p>
+    <button class="btn ghost sm" data-a="hold">Hold reserves instead (+1 silver)</button>
+    <div class="moveGroup"><h4>Claim an open market</h4>${claimRows ? `<ul class="mList grid">${claimRows}</ul>` : `<p class="empty">No open market is affordable yet.</p>`}</div>
+    ${seizeRows ? `<div class="moveGroup"><h4>Seize a rival’s market</h4><ul class="mList">${seizeRows}</ul></div>` : ""}
+    <div class="moveGroup"><h4>Adopt a technology</h4>${techs ? `<ul class="mList">${techs}</ul>` : `<p class="empty">You’ve adopted every technology.</p>`}</div>`;
+}
+
+function eventCard() {
+  const E = EVENTS[S.event.id];
+  const nextP = getP(S, S.order[0]);
+  const canGo = net.kind === "local" || S.hostId === net.me || S.order[0] === net.me;
+  return `<article class="card evCard">
+    <p class="evRound">End of round ${S.event.round}: an event shapes the world</p>
+    <h2>${esc(E.title)}</h2>
+    <p class="evDate">${esc(E.date)}</p>
+    <p class="evBlurb">${esc(E.blurb)}</p>
+    <p class="evEffect"><b>Effect.</b> ${esc(E.effect)}</p>
+    <ul class="evResults">${S.event.results.map(r => `<li>${esc(r)}</li>`).join("")}</ul>
+    ${canGo ? `<button class="btn ink" data-a="continue">Begin round ${S.round + 1}</button>` : `<p class="waiting">Waiting for ${esc(nextP.name)} to begin round ${S.round + 1}.</p>`}
+  </article>`;
+}
+
+function marketPanel(mid) {
+  const M = MARKETS[mid], owner = S.markets[mid], op = owner ? getP(S, owner) : null;
+  const A = activeId(S), mine = isMine() && S.phase === "action";
+  let btn = "";
+  if (mine) {
+    const p = getP(S, A);
+    if (!owner) { const c = claimCost(S, A, mid); btn = p.silver >= c ? `<button class="btn" data-a="claim" data-m="${mid}">Claim for ${c} silver</button>` : `<p class="hint">Claiming costs you ${c} silver. You have ${p.silver}.</p>`; }
+    else if (owner === A) btn = `<p class="hint">You hold this market.</p>`;
+    else if (S.capitals[mid]) btn = `<p class="hint">A capital can’t be seized.</p>`;
+    else { const c = seizeCost(S, A, mid); btn = p.silver >= c ? `<button class="btn" data-a="seize" data-m="${mid}">Seize for ${c} silver</button>` : `<p class="hint">Seizing costs you ${c} silver. You have ${p.silver}.</p>`; }
+  }
+  return `<section class="mPanel" aria-label="${esc(M.name)} details">
+    <div class="mpHead"><h3>${esc(M.name)}</h3><button class="btn link sm" data-a="closeSel" aria-label="Close market details">Close</button></div>
+    <p class="mpSub">${esc(M.product)}, ${esc(GOODS[M.good].name.toLowerCase())}. ${esc(REGIONS[M.region].name)}. Base cost ${M.cost} silver.</p>
+    <p class="mpOwner">${op ? `${chip(op, "sm")}Held by ${who(op)}${S.capitals[mid] ? ". Capital." : "."}` : "Open to claim."}</p>
+    <p class="mpNote">${esc(M.note)}</p>
+    ${btn}
+  </section>`;
+}
+
+/* ---- Game over ---- */
+function overView() {
+  const st = standings(S), top = st[0].score;
+  const winners = st.filter(x => x.score === top && x.silver === st[0].silver).map(x => getP(S, x.id));
+  const title = winners.length > 1 ? `A tie between ${winners.map(w => esc(w.name)).join(" and ")}` : `${esc(winners[0].name)} wins`;
+  const subtitle = winners.length > 1 ? `${top} prestige each.` : `${winners[0].name !== POWERS[winners[0].power].name ? esc(POWERS[winners[0].power].name) + ", " : ""}${top} prestige.`;
+  const cols = ["markets", "regions", "goods", "techs", "knowledge", "bullion"];
+  const heads = ["Markets", "Regions", "Goods", "Tech", "Answers", "Bullion"];
+  const rows = st.map((x, i) => {
+    const p = getP(S, x.id), sc = score(S, x.id);
+    return `<tr${i === 0 ? ' class="win"' : ""}><td>${i + 1}</td><td><div class="who">${chip(p)}<span><b>${esc(p.name)}</b>${p.name !== POWERS[p.power].name ? `<span>${esc(POWERS[p.power].name)}</span>` : ""}</span></div></td>${cols.map(k => `<td>${sc.parts.find(z => z.key === k).n}</td>`).join("")}<td class="tot">${sc.total}</td></tr>`;
+  }).join("");
+  const reviewIds = net.kind === "online" ? [net.me] : S.order;
+  if (!ui.reviewWho || !reviewIds.includes(ui.reviewWho)) ui.reviewWho = reviewIds[0];
+  return `${topBar()}
+  <main class="page over">
+    <h1 class="pageTitle">${title}</h1>
+    <p class="overSub">${subtitle}</p>
+    <p class="hint">Final standings after ${S.round} round${S.round === 1 ? "" : "s"}. Ties go to the player with more silver.</p>
+    <div class="tableWrap"><table class="final"><thead><tr><th>#</th><th>Player</th>${heads.map(h => `<th>${h}</th>`).join("")}<th>Prestige</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div id="mapSlot" class="mapFrame small"></div>
+    <section class="review">
+      <h2>Study review</h2>
+      ${reviewIds.length > 1 ? `<div class="seg inline" role="group" aria-label="Choose a player">${reviewIds.map(id => `<button class="segBtn${ui.reviewWho === id ? " on" : ""}" data-a="reviewWho" data-id="${esc(id)}" aria-pressed="${ui.reviewWho === id}">${esc(getP(S, id).name)}</button>`).join("")}</div>` : ""}
+      ${reviewFor(ui.reviewWho)}
+    </section>
+    <div class="actions"><button class="btn" data-a="home">Back to the start screen</button>${net.kind === "online" && S.hostId === net.me ? `<button class="btn ghost" data-a="closeRoom">Close this room</button>` : ""}</div>
+  </main>`;
+}
+function reviewFor(id) {
+  const p = getP(S, id); if (!p) return "";
+  const hist = S.history.filter(h => h.id === id);
+  if (!hist.length) return `<p class="empty">${esc(p.name)} didn’t answer any questions.</p>`;
+  const byType = Object.keys(QTYPES).map(t => { const hs = hist.filter(h => Q_BY_ID[h.qid].t === t); return hs.length ? `<span><b>${hs.filter(h => h.ok).length}/${hs.length}</b> ${QTYPES[t].name}</span>` : ""; }).join("");
+  const topicMiss = {};
+  hist.forEach(h => { const tp = Q_BY_ID[h.qid].topic; topicMiss[tp] = topicMiss[tp] || [0, 0]; topicMiss[tp][1]++; if (h.ok) topicMiss[tp][0]++; });
+  const weak = Object.keys(topicMiss).filter(k => topicMiss[k][0] < topicMiss[k][1]).sort((a, b) => (topicMiss[a][0] / topicMiss[a][1]) - (topicMiss[b][0] / topicMiss[b][1]));
+  const missed = hist.filter(h => !h.ok).map(h => {
+    const q = Q_BY_ID[h.qid];
+    return `<li class="card rv"><p class="qMeta"><span>${QTYPES[q.t].name}</span><span>${esc(TOPICS[q.topic])}</span></p>
+      ${q.s ? `<p class="rvStim">${esc(q.s)}</p>` : ""}<p class="qText">${esc(q.q)}</p>
+      <p class="rvA"><b>Answer:</b> ${esc(q.o[0])}</p>${h.choice != null && h.choice !== 0 ? `<p class="rvYou"><b>Chosen:</b> ${esc(q.o[h.choice])}</p>` : ""}
+      <p class="why">${esc(q.why)}</p></li>`;
+  }).join("");
+  return `<div class="acc">${byType}</div>
+    ${weak.length ? `<p class="hint">Topics to review: ${weak.map(k => esc(TOPICS[k])).join("; ")}.</p>` : `<p class="hint">Every answer was correct. Nice work.</p>`}
+    ${missed ? `<ul class="rvList">${missed}</ul>` : ""}`;
+}
+
+/* ---- Modals ---- */
+function renderModal() {
+  let el = $("#modal");
+  if (!ui.modal) { if (el) el.remove(); return; }
+  if (!el) { el = document.createElement("div"); el.id = "modal"; document.body.appendChild(el); }
+  let inner = "";
+  if (ui.modal === "rules") inner = rulesHTML();
+  if (ui.modal === "menu") inner = menuHTML();
+  el.innerHTML = `<div class="scrim" data-a="closeModal"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">${inner}</div>`;
+  const first = el.querySelector("button, [href]");
+  if (first && !el.contains(document.activeElement)) first.focus();
+}
+function rulesHTML() {
+  return `<div class="sheetHead"><h2 id="sheetTitle">How to play</h2><button class="btn link sm" data-a="closeModal">Close</button></div>
+  <div class="rules">
+    <p>You lead a power between 1450 and 1750. Earn silver by answering questions about Unit 4, then spend it to build a trading empire. After the last round, the player with the most prestige wins.</p>
+    <h3>Your turn</h3>
+    <ol>
+      <li><b>Collect revenue.</b> 2 silver, plus 1 for each market you hold, plus any bonuses from your power or technologies.</li>
+      <li><b>Answer a question.</b> Choose Recall (2 silver), Source (3 silver), or Reasoning (4 silver). A correct answer pays the silver and adds 1 prestige. Everyone sees the explanation.</li>
+      <li><b>Make one move.</b> Claim an open market, seize a rival’s market (its cost plus 3), adopt a technology, or hold reserves for 1 silver. Capitals can’t be seized.</li>
+    </ol>
+    <p>After every player has gone, a historical event affects the whole table.</p>
+    <h3>Prestige</h3>
+    <ul>
+      <li>2 for each market you hold</li>
+      <li>2 for each region you reach beyond your first (Atlantic Africa, the Americas, the Indian Ocean, East and Southeast Asia)</li>
+      <li>1 for each different kind of good you hold</li>
+      <li>1 for each technology, plus 2 for the full navigation set: compass, astrolabe, and lateen sail</li>
+      <li>1 for each correct answer</li>
+      <li>1 for every 5 silver left at the end</li>
+    </ul>
+    <h3>Powers</h3>
+    ${powerRef()}
+    <h3>A note on content</h3>
+    <p>Enslaved people are never a resource in this game. The slave trade and forced labor appear in events and questions so you can study their causes, their consequences, and the people who resisted them.</p>
+  </div>`;
+}
+function menuHTML() {
+  const host = S && (S.mode === "local" || S.hostId === (net && net.me));
+  const playing = S && S.status === "playing";
+  return `<div class="sheetHead"><h2 id="sheetTitle">Menu</h2><button class="btn link sm" data-a="closeModal">Close</button></div>
+  <div class="menuList">
+    ${playing && host ? `<button class="btn ghost wide" data-a="endGame">End the game now and score it</button>` : ""}
+    ${S && S.mode === "local" ? `<button class="btn ghost wide" data-a="home">Exit to the start screen</button><p class="hint">This game stays saved on this device, so you can resume it.</p>`
+      : `<button class="btn ghost wide" data-a="leave">Leave this room</button><p class="hint">${playing ? "The game keeps going without you. You can rejoin with the room code." : ""}</p>`}
+  </div>`;
+}
+
+/* ---------------- EVENTS ---------------- */
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-a]");
+  if (!b || b.disabled) return;
+  const a = b.getAttribute("data-a");
+  switch (a) {
+    case "rules": ui.modal = "rules"; renderModal(); return;
+    case "menu": ui.modal = "menu"; renderModal(); return;
+    case "closeModal": ui.modal = null; renderModal(); return;
+    case "home": ui.modal = null; goHome(); return;
+    case "localSetup": ui.screen = "localSetup"; render(); return;
+    case "resumeLocal": { const s = savedLocal(); if (s) startLocalSession(s); return; }
+    case "lcount": ui.local.count = +b.dataset.n; fixLocalPowers(); render(); return;
+    case "lrounds": ui.local.rounds = +b.dataset.n; render(); return;
+    case "localStart": return localStart();
+    case "create": case "join": case "rejoin": return onlineEntry(a);
+    case "copyCode": try { await navigator.clipboard.writeText(S.code); toast("Room code copied."); } catch (err) { toast(`The room code is ${S.code}.`); } return;
+    case "pick": { const me = getP(S, net.me); return act({ type: "pickPower", power: me && me.power === b.dataset.p ? null : b.dataset.p }); }
+    case "rounds": return act({ type: "setRounds", rounds: +b.dataset.n });
+    case "start": return act({ type: "start" });
+    case "chooseQ": ui.sel = null; return act({ type: "chooseQ", qtype: b.dataset.t });
+    case "answer": return act({ type: "answer", choice: +b.dataset.c });
+    case "guess": ui.guess = { key: S.cur.key, choice: +b.dataset.c }; render(); return;
+    case "toAction": return act({ type: "toAction" });
+    case "claim": case "seize": ui.sel = null; return act({ type: a, market: b.dataset.m });
+    case "adopt": return act({ type: "adopt", tech: b.dataset.t });
+    case "hold": return act({ type: "hold" });
+    case "skip": if (confirm("Skip this player’s turn?")) return act({ type: "skip" }); return;
+    case "continue": return act({ type: "continue" });
+    case "endGame": ui.modal = null; if (confirm("End the game now? Scores are final.")) return act({ type: "endGame" }); renderModal(); return;
+    case "closeSel": ui.sel = null; render(); return;
+    case "reviewWho": ui.reviewWho = b.dataset.id; render(); return;
+    case "leave":
+      ui.modal = null;
+      if (S && S.status === "lobby") { try { await net.dispatch({ type: "leave" }); } catch (err) {} }
+      goHome(); return;
+    case "closeRoom":
+      if (!confirm("Close this room? Everyone’s game data will be deleted.")) return;
+      try { const ref = FB.ref; disconnect(true); await ref.remove(); } catch (err) { toast(friendlyError(err)); }
+      S = null; net = null; ui.screen = "home"; render(); return;
+  }
+});
+document.addEventListener("input", e => {
+  const t = e.target;
+  if (t.matches("[data-lp]")) ui.local.players[+t.dataset.lp].name = t.value;
+  if (t.id === "code") t.value = t.value.toUpperCase().replace(/[^A-Z]/g, "");
+});
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.matches("[data-lpow]")) { ui.local.players[+t.dataset.lpow].power = t.value; render(); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && ui.modal) { ui.modal = null; renderModal(); }
+  if (e.key === "Enter" && e.target.id === "code") onlineEntry("join");
+});
+
+function fixLocalPowers() {
+  const used = new Set();
+  ui.local.players.forEach(p => {
+    if (used.has(p.power)) p.power = POWER_ORDER.find(k => !used.has(k));
+    used.add(p.power);
+  });
+}
+function localStart() {
+  const L = ui.local, ps = L.players.slice(0, L.count);
+  if (new Set(ps.map(p => p.power)).size !== ps.length) { toast("Each player needs a different power."); return; }
+  let st = newGame({ mode: "local", code: "", hostId: "p1", seed: (Math.random() * 2147483647) | 0 });
+  ps.forEach((p, i) => {
+    const id = "p" + (i + 1);
+    st = reduce(st, { type: "join", name: p.name.trim() || POWERS[p.power].name }, id);
+    st = reduce(st, { type: "pickPower", power: p.power, player: id }, id);
+  });
+  st = reduce(st, { type: "setRounds", rounds: L.rounds }, "p1");
+  st = reduce(st, { type: "start" }, "p1");
+  startLocalSession(st);
+}
+async function onlineEntry(kind) {
+  if (!ONLINE_READY || ui.busy) return;
+  const nickEl = $("#nick"), name = (nickEl ? nickEl.value : store.get("tw.nick") || "").trim();
+  if (!name) { toast("Enter a nickname first."); if (nickEl) nickEl.focus(); return; }
+  store.set("tw.nick", name);
+  let code = kind === "rejoin" ? store.get("tw.lastCode") : ($("#code") ? $("#code").value.trim().toUpperCase() : "");
+  if (kind !== "create" && !/^[A-Z]{4}$/.test(code)) { toast("Room codes are 4 letters."); return; }
+  ui.busy = true;
+  const btn = $(`[data-a="${kind}"]`); if (btn) { btn.disabled = true; btn.textContent = "Connecting…"; }
+  try {
+    if (kind === "create") await createOnline(name);
+    else await joinOnline(code, name);
+  } catch (e) {
+    toast(friendlyError(e));
+    if (kind === "rejoin" && /no game/i.test(e.message || "")) store.del("tw.lastCode");
+    disconnect(false); S = null; net = null; ui.screen = "home"; render();
+  } finally { ui.busy = false; }
+}
+
+/* ---------------- BOOT ---------------- */
+render();
+
+</script>
+</body>
+</html>
