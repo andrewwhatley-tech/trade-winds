@@ -8,7 +8,8 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%B5%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<!-- Fonts load without blocking the page: if Google Fonts is slow or blocked, the game still appears. -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;0,800;1,400&family=IM+Fell+English:ital@0;1&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <script>
 /* =====================================================================
    ONLINE PLAY SETUP
@@ -25,15 +26,17 @@
 
    With null, the game still works in one-screen mode.
    ===================================================================== */
-const FIREBASE_CONFIG = const firebaseConfig = {
-  apiKey: "AIzaSyDSrMWW8YHWIuw10PQ1ihFEaroEB4HdWZ8",
-  authDomain: "unit-4---trade-winds.firebaseapp.com",
-  databaseURL: "https://unit-4---trade-winds-default-rtdb.firebaseio.com",
-  projectId: "unit-4---trade-winds",
-  storageBucket: "unit-4---trade-winds.firebasestorage.app",
-  messagingSenderId: "331926830672",
-  appId: "1:331926830672:web:7c844df08ba4864211db55"
-};
+const FIREBASE_CONFIG = null;
+</script>
+<style>
+:root {
+  --indigo: #1E2A5A; --indigo2: #25336B; --indigo3: #2F3F7E; --sea: #22306A;
+  --cotton: #E4D9BF; --text: #ECE4D0; --text2: rgba(236, 228, 208, .74); --line: rgba(236, 228, 208, .17);
+  --paper: #F3ECDD; --paper2: #E8DEC8; --ink: #221F1A; --ink2: #5B5345;
+  --glass: #9ED9CF; --glassInk: #0E2B30; --madder: #A33B2C; --leaf: #2E7349;
+  --serif: "IM Fell English", "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: "Alegreya Sans", "Gill Sans", "Gill Sans MT", "Segoe UI", system-ui, sans-serif;
+}
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--indigo); color: var(--text); font-family: var(--sans); font-size: 16px; line-height: 1.45; -webkit-font-smoothing: antialiased; }
 h1, h2, h3, h4 { margin: 0; }
